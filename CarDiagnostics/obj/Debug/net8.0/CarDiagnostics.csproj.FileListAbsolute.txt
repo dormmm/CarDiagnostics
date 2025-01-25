@@ -35,3 +35,4 @@ c:\project dor\CarDiagnostics\bin\Debug\net8.0\Microsoft.Bcl.Memory.dll
 c:\project dor\CarDiagnostics\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
 c:\project dor\CarDiagnostics\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
 c:\project dor\CarDiagnostics\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+c:\project dor\CarDiagnostics\obj\Debug\net8.0\CarDiagnostics.sourcelink.json

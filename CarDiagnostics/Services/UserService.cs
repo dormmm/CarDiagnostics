@@ -1,27 +1,22 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using CarDiagnostics.Models;
 
 namespace CarDiagnostics.Services
 {
     public class UserService : IUserService
     {
-        private readonly List<User> _users = new List<User>();
+        private static List<User> _users = new List<User>();
 
         public void Register(string username, string password, string email)
         {
-            if (_users.Any(u => u.Username == username))
+            var user = new User
             {
-                throw new InvalidOperationException("Username already exists.");
-            }
-
-            _users.Add(new User
-            {
+                Id = _users.Count + 1,
                 Username = username,
                 Password = password,
                 Email = email
-            });
+            };
+            _users.Add(user);
         }
 
         public List<User> GetAllUsers()
