@@ -7,5 +7,6 @@ namespace CarDiagnostics.Services
     {
         void Register(string username, string password, string email);
         List<User> GetAllUsers();
+        void UpdateUserProfile(int userId, string name, string email, string password = null); // פונקציה לעדכון פרטי משתמש
     }
 }

@@ -23,5 +23,19 @@ namespace CarDiagnostics.Services
         {
             return _users;
         }
+
+        public void UpdateUserProfile(int userId, string name, string email, string password = null)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == userId);
+            if (user != null)
+            {
+                user.Username = name;
+                user.Email = email;
+                if (!string.IsNullOrEmpty(password))
+                {
+                    user.Password = password; // אם הוספנו סיסמה חדשה, נעשה עדכון
+                }
+            }
+        }
     }
 }

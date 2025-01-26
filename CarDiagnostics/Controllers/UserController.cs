@@ -38,5 +38,12 @@ namespace CarDiagnostics.Controllers
                 return Conflict(new { Message = ex.Message });
             }
         }
+
+        [HttpPut("update/{id}")]
+        public IActionResult UpdateUserProfile(int id, [FromBody] UpdateUserProfileRequest request)
+        {
+            _userService.UpdateUserProfile(id, request.Username, request.Email, request.Password);
+            return Ok(new { Message = "User profile updated successfully" });
+        }
     }
 }
