@@ -1,4 +1,4 @@
-namespace CarDiagnostics.DTOs
+namespace CarDiagnostics.DTO
 {
     public class RegisterRequest
     {

@@ -1,4 +1,6 @@
+using CarDiagnostics.Models;
 namespace CarDiagnostics.Models
+
 {
     public class User
     {

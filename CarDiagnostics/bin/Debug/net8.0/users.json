@@ -1,0 +1,8 @@
+[
+  {
+    "Id": 1,
+    "Username": "john_doe",
+    "Password": "SecurePass123",
+    "Email": "john.doe@example.com"
+  }
+]
