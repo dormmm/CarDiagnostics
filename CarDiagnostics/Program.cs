@@ -10,6 +10,9 @@ builder.Services.AddSwaggerGen();
 // Register IUserService
 builder.Services.AddScoped<IUserService, UserService>();
 
+// Register CarService
+builder.Services.AddScoped<CarService>();  // הוספת רישום של CarService
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

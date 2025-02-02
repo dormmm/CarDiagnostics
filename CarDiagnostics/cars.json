@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "Engine is overheating",
+    "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "HOT",
+    "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "Engine is overheating",
+    "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "Engine is COLD",
+    "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "Engine is 11COLD",
+    "UserId": 1
+  }
+]

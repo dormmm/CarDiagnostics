@@ -1,0 +1,15 @@
+[
+    {
+        "Id": 1,
+        "Company": "Toyota",
+        "Model": "Corolla",
+        "Year": 2020
+    },
+    
+    {
+        "Id": 2,
+        "Company": "BMW",
+        "Model": "X5",
+        "Year": 2019
+    }
+]
