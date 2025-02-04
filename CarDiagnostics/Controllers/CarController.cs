@@ -1,6 +1,7 @@
 using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace CarDiagnostics.Controllers
 {
@@ -21,7 +22,16 @@ namespace CarDiagnostics.Controllers
         {
             try
             {
-                // ה-UserId יכול להגיע מה-Session או Token. כרגע אנחנו מניחים 1.
+                // בדיקה אם הרכב קיים
+                var cars = _carService.ReadCarsFromFile();
+                var existingCar = cars.FirstOrDefault(c => c.Company == car.Company && c.Model == car.Model && c.Year == car.Year);
+
+                if (existingCar == null)
+                {
+                    return BadRequest(new { Message = "Car not found in the system." }); // אם הרכב לא נמצא
+                }
+
+                // הוספת הבעיה לרכב
                 int userId = car.UserId;  // השתמש ב-UserId שנשלח מה-Postman
 
                 _carService.SubmitProblem(userId, car.Company, car.Model, car.Year, car.ProblemDescription);
