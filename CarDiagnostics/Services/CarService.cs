@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using CarDiagnostics.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 
 namespace CarDiagnostics.Services
@@ -11,6 +12,52 @@ namespace CarDiagnostics.Services
     {
         private readonly string _carsFilePath = "vehicles.json"; // קובץ הרכבים
         private readonly string _carsCallsFilePath = "carsCalls.json"; // קובץ הקריאות
+        private readonly string _vehiclesListFilePath = "vehiclesList.json"; // קובץ החברות והדגמים
+
+          // קריאה מקובץ vehiclesList.json (חברות ודגמים בלבד)
+        public Dictionary<string, List<dynamic>> ReadVehiclesListFromFile()
+        {
+            if (!File.Exists(_vehiclesListFilePath))
+            {
+                return new Dictionary<string, List<dynamic>>(); // אם אין קובץ, מחזירים רשימה ריקה
+            }
+
+            var json = File.ReadAllText(_vehiclesListFilePath);
+            return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json) ?? new Dictionary<string, List<dynamic>>();
+        }
+
+         // בדיקה אם חברה קיימת
+        public bool IsCompanyExists(string company)
+        {
+            var vehiclesData = ReadVehiclesListFromFile();
+            return vehiclesData.ContainsKey(company);
+        }
+
+        // בדיקה אם דגם רכב קיים תחת חברה
+        public bool IsCarModelExists(string company, string model)
+        {
+            var vehiclesData = ReadVehiclesListFromFile();
+            return vehiclesData.ContainsKey(company) && vehiclesData[company].Any(m => (string)m.model == model);
+        }
+
+        // הצגת כל החברות הקיימות במערכת
+        public List<string> GetAllCarCompanies()
+        {
+            return ReadVehiclesListFromFile().Keys.ToList();
+        }
+
+       public List<string> GetCarModelsByCompany(string company)
+{
+    var vehiclesData = ReadVehiclesListFromFile();
+    
+    if (vehiclesData.ContainsKey(company))
+    {
+        return vehiclesData[company].Select(m => (string)m["model"]).ToList();
+    }
+
+    return new List<string>(); // אם החברה לא קיימת, נחזיר רשימה ריקה
+}
+
 
         // קריאה מקובץ cars.json
         public List<Car> ReadCarsFromFile()

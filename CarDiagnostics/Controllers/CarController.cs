@@ -16,6 +16,27 @@ namespace CarDiagnostics.Controllers
             _carService = carService;
         }
 
+         // ✅ הצגת כל החברות הקיימות במערכת
+        [HttpGet("getCarCompanies")]
+        public IActionResult GetCarCompanies()
+        {
+            var companies = _carService.GetAllCarCompanies();
+            return Ok(companies);
+        }
+
+        // ✅ הצגת כל הדגמים של חברה מסוימת
+        [HttpGet("getCarModels/{company}")]
+        public IActionResult GetCarModels(string company)
+        {
+            if (!_carService.IsCompanyExists(company))
+            {
+                return NotFound(new { Message = "Company not found in the system." });
+            }
+
+            var models = _carService.GetCarModelsByCompany(company);
+            return Ok(models);
+        }
+
         // הוספת רכב עם קישור למשתמש
         [HttpPost("submitProblem")]
         public IActionResult SubmitProblem([FromBody] Car car)

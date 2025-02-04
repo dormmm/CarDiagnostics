@@ -46,5 +46,13 @@
     "Year": 2020,
     "ProblemDescription": "TEXT",
     "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "TEXT1",
+    "UserId": 1
   }
 ]
