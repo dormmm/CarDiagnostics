@@ -16,7 +16,7 @@ namespace CarDiagnostics.Controllers
             _carService = carService;
         }
 
-         // ✅ הצגת כל החברות הקיימות במערכת
+        // ✅ הצגת כל החברות הקיימות במערכת
         [HttpGet("getCarCompanies")]
         public IActionResult GetCarCompanies()
         {
@@ -37,25 +37,27 @@ namespace CarDiagnostics.Controllers
             return Ok(models);
         }
 
-        // הוספת רכב עם קישור למשתמש
+        // ✅ הגשת קריאת שירות לרכב
         [HttpPost("submitProblem")]
         public IActionResult SubmitProblem([FromBody] Car car)
         {
             try
             {
-                // בדיקה אם הרכב קיים
-                var cars = _carService.ReadCarsFromFile();
-                var existingCar = cars.FirstOrDefault(c => c.Company == car.Company && c.Model == car.Model && c.Year == car.Year);
-
-                if (existingCar == null)
+                // בדיקה אם החברה קיימת
+                if (!_carService.IsCompanyExists(car.Company))
                 {
-                    return BadRequest(new { Message = "Car not found in the system." }); // אם הרכב לא נמצא
+                    return BadRequest(new { Message = "Company not found in the system." });
                 }
 
-                // הוספת הבעיה לרכב
-                int userId = car.UserId;  // השתמש ב-UserId שנשלח מה-Postman
+                // בדיקה אם הדגם קיים תחת החברה
+                if (!_carService.IsCarModelExists(car.Company, car.Model))
+                {
+                    return BadRequest(new { Message = "Car model not found under this company." });
+                }
 
-                _carService.SubmitProblem(userId, car.Company, car.Model, car.Year, car.ProblemDescription);
+                // קריאה לשירות הוספת קריאה למערכת
+                _carService.SubmitProblem(car.Company, car.Model, car.Year, car.ProblemDescription);
+
                 return Ok(new { Message = "Problem submitted successfully!" });
             }
             catch (System.Exception ex)

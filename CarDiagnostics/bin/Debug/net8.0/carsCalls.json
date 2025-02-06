@@ -54,5 +54,37 @@
     "Year": 2020,
     "ProblemDescription": "TEXT1",
     "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "TEXDDT1",
+    "UserId": 1
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "TEXDDT1",
+    "UserId": 0
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2020,
+    "ProblemDescription": "Engine overheating",
+    "UserId": 0
+  },
+  {
+    "Id": 0,
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2022,
+    "ProblemDescription": "Engine overheating TT",
+    "UserId": 0
   }
 ]

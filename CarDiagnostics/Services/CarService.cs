@@ -5,16 +5,19 @@ using CarDiagnostics.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
-
 namespace CarDiagnostics.Services
 {
     public class CarService
     {
-        private readonly string _carsFilePath = "vehicles.json"; // קובץ הרכבים
-        private readonly string _carsCallsFilePath = "carsCalls.json"; // קובץ הקריאות
-        private readonly string _vehiclesListFilePath = "vehiclesList.json"; // קובץ החברות והדגמים
+        // נתיבי קבצים
+        private readonly string _carsCallsFilePath = "carsCalls.json"; // קובץ קריאות תיקון
+        private readonly string _vehiclesListFilePath = "vehiclesList.json"; // קובץ יצרנים ודגמים
 
-          // קריאה מקובץ vehiclesList.json (חברות ודגמים בלבד)
+        // ==============================
+        //         קריאה מקבצים
+        // ==============================
+
+        /// קריאה מקובץ vehiclesList.json (יצרנים ודגמים)
         public Dictionary<string, List<dynamic>> ReadVehiclesListFromFile()
         {
             if (!File.Exists(_vehiclesListFilePath))
@@ -26,102 +29,97 @@ namespace CarDiagnostics.Services
             return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json) ?? new Dictionary<string, List<dynamic>>();
         }
 
-         // בדיקה אם חברה קיימת
+        /// קריאה מקובץ carsCalls.json (קריאות תיקון)
+        public List<Car> ReadCarsCallsFromFile()
+        {
+            if (!File.Exists(_carsCallsFilePath))
+            {
+                return new List<Car>(); 
+            }
+
+            var json = File.ReadAllText(_carsCallsFilePath);
+            return JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>();
+        }
+
+        /// שמירת קריאות תיקון לקובץ carsCalls.json
+        public void SaveCarsCallsToFile(List<Car> cars)
+        {
+            var json = JsonConvert.SerializeObject(cars, Formatting.Indented);
+            File.WriteAllText(_carsCallsFilePath, json);  
+        }
+
+        // ==============================
+        //        חיפושי נתונים
+        // ==============================
+
+        /// בדיקה אם יצרן רכב קיים במערכת
         public bool IsCompanyExists(string company)
         {
             var vehiclesData = ReadVehiclesListFromFile();
             return vehiclesData.ContainsKey(company);
         }
 
-        // בדיקה אם דגם רכב קיים תחת חברה
+        /// בדיקה אם דגם מסוים קיים תחת יצרן מסוים
         public bool IsCarModelExists(string company, string model)
         {
             var vehiclesData = ReadVehiclesListFromFile();
-            return vehiclesData.ContainsKey(company) && vehiclesData[company].Any(m => (string)m.model == model);
+            return vehiclesData.ContainsKey(company) && vehiclesData[company].Any(m => (string)m["model"] == model);
         }
 
-        // הצגת כל החברות הקיימות במערכת
+        /// קבלת רשימת כל היצרנים הקיימים במערכת
         public List<string> GetAllCarCompanies()
         {
             return ReadVehiclesListFromFile().Keys.ToList();
         }
 
-       public List<string> GetCarModelsByCompany(string company)
-{
-    var vehiclesData = ReadVehiclesListFromFile();
-    
-    if (vehiclesData.ContainsKey(company))
-    {
-        return vehiclesData[company].Select(m => (string)m["model"]).ToList();
-    }
-
-    return new List<string>(); // אם החברה לא קיימת, נחזיר רשימה ריקה
-}
-
-
-        // קריאה מקובץ cars.json
-        public List<Car> ReadCarsFromFile()
+        /// קבלת רשימת דגמים עבור יצרן מסוים
+        public List<string> GetCarModelsByCompany(string company)
         {
-            // הדפסת הנתיב הנוכחי של האפליקציה
-            string currentDirectory = Directory.GetCurrentDirectory();
-            Console.WriteLine("Current Directory: " + currentDirectory);
+            var vehiclesData = ReadVehiclesListFromFile();
 
-            // יצירת הנתיב המלא לקובץ vehicles.json
-            string fullPath = Path.Combine(currentDirectory, _carsFilePath);
-            Console.WriteLine("Full file path: " + fullPath);
-
-            if (!File.Exists(fullPath))
+            if (vehiclesData.ContainsKey(company))
             {
-                Console.WriteLine("File not found: " + fullPath);
-                return new List<Car>(); // אם הקובץ לא קיים, נחזיר רשימה ריקה
+                return vehiclesData[company].Select(m => (string)m["model"]).ToList();
             }
 
-            var json = File.ReadAllText(fullPath);
-            return JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>(); // החזרת המידע מקובץ JSON
+            return new List<string>(); // אם החברה לא קיימת, נחזיר רשימה ריקה
         }
 
-        // שמירה ב-carsCalls.json
-        public void SaveCarsCallsToFile(List<Car> cars)
+        // ==============================
+        //        שירותים עיקריים
+        // ==============================
+
+        /// הגשת קריאת תיקון עבור רכב קיים
+        public IActionResult SubmitProblem(string company, string model, int year, string problemDescription)
         {
-            var json = JsonConvert.SerializeObject(cars, Formatting.Indented);
-            File.WriteAllText(_carsCallsFilePath, json);  // שמירה בקובץ carsCalls.json
+            // קריאת רשימת החברות והדגמים
+            var vehiclesData = ReadVehiclesListFromFile();
+
+            // בדיקה אם החברה והדגם קיימים
+            if (!IsCompanyExists(company) || !IsCarModelExists(company, model))
+            {
+                return new BadRequestObjectResult("Company or model not found in the system.");
+            }
+
+            // יצירת קריאה חדשה
+            var carCall = new Car
+            {
+                Company = company,
+                Model = model,
+                Year = year,
+                ProblemDescription = problemDescription
+            };
+
+            // טעינת הקריאות הקיימות בקובץ
+            var carCalls = ReadCarsCallsFromFile();
+
+            // הוספת הקריאה החדשה
+            carCalls.Add(carCall);
+
+            // שמירת הקריאות חזרה לקובץ
+            SaveCarsCallsToFile(carCalls);
+
+            return new OkObjectResult("Problem submitted successfully!");
         }
-
-          // הגשה של בעיה לרכב - אם הרכב קיים ב-vehicles.json
-    public IActionResult SubmitProblem(int userId, string company, string model, int year, string problemDescription)
-    {
-        var cars = ReadCarsFromFile();
-
-        // בדיקת האם הרכב קיים ב-vehicles.json
-        var existingCar = cars.FirstOrDefault(c => c.Company == company && c.Model == model && c.Year == year);
-
-        if (existingCar == null)
-        {
-            return new BadRequestObjectResult("Car not found in the system."); // אם הרכב לא נמצא
-        }
-
-        // הוספת הבעיה לרכב
-        var carCall = new Car
-        {
-            UserId = userId,  // קישור למשתמש
-            Company = company,
-            Model = model,
-            Year = year,
-            ProblemDescription = problemDescription
-        };
-
-        // קריאה חדשה
-        var carCalls = new List<Car>();
-        if (File.Exists(_carsCallsFilePath))
-        {
-            carCalls = JsonConvert.DeserializeObject<List<Car>>(File.ReadAllText(_carsCallsFilePath)) ?? new List<Car>();
-        }
-
-        // הוספת קריאת הרכב
-        carCalls.Add(carCall);
-        SaveCarsCallsToFile(carCalls);  // שמירה ב-carsCalls.json
-
-        return new OkObjectResult("Problem submitted successfully!"); // שליחה בהצלחה
-    }
     }
 }
