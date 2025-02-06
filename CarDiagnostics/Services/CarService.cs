@@ -10,12 +10,25 @@ namespace CarDiagnostics.Services
     public class CarService
     {
         // נתיבי קבצים
+        private readonly string _usersFilePath = "users.json"; // קובץ המשתמשים
         private readonly string _carsCallsFilePath = "carsCalls.json"; // קובץ קריאות תיקון
         private readonly string _vehiclesListFilePath = "vehiclesList.json"; // קובץ יצרנים ודגמים
 
         // ==============================
         //         קריאה מקבצים
         // ==============================
+
+        /// קריאה מקובץ users.json (רשימת משתמשים)
+        public List<User> ReadUsersFromFile()
+        {
+            if (!File.Exists(_usersFilePath))
+            {
+                return new List<User>(); // אם אין קובץ, מחזירים רשימה ריקה
+            }
+
+            var json = File.ReadAllText(_usersFilePath);
+            return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
+        }
 
         /// קריאה מקובץ vehiclesList.json (יצרנים ודגמים)
         public Dictionary<string, List<dynamic>> ReadVehiclesListFromFile()
@@ -34,7 +47,7 @@ namespace CarDiagnostics.Services
         {
             if (!File.Exists(_carsCallsFilePath))
             {
-                return new List<Car>(); 
+                return new List<Car>();
             }
 
             var json = File.ReadAllText(_carsCallsFilePath);
@@ -45,7 +58,7 @@ namespace CarDiagnostics.Services
         public void SaveCarsCallsToFile(List<Car> cars)
         {
             var json = JsonConvert.SerializeObject(cars, Formatting.Indented);
-            File.WriteAllText(_carsCallsFilePath, json);  
+            File.WriteAllText(_carsCallsFilePath, json);
         }
 
         // ==============================
@@ -66,6 +79,13 @@ namespace CarDiagnostics.Services
             return vehiclesData.ContainsKey(company) && vehiclesData[company].Any(m => (string)m["model"] == model);
         }
 
+        /// בדיקה אם משתמש קיים על פי שם משתמש ואימייל
+        public bool IsUserValid(string username, string email)
+        {
+            var users = ReadUsersFromFile();
+            return users.Any(u => u.Username == username && u.Email == email);
+        }
+
         /// קבלת רשימת כל היצרנים הקיימים במערכת
         public List<string> GetAllCarCompanies()
         {
@@ -76,7 +96,7 @@ namespace CarDiagnostics.Services
         public List<string> GetCarModelsByCompany(string company)
         {
             var vehiclesData = ReadVehiclesListFromFile();
-
+            
             if (vehiclesData.ContainsKey(company))
             {
                 return vehiclesData[company].Select(m => (string)m["model"]).ToList();
@@ -89,21 +109,29 @@ namespace CarDiagnostics.Services
         //        שירותים עיקריים
         // ==============================
 
-        /// הגשת קריאת תיקון עבור רכב קיים
-        public IActionResult SubmitProblem(string company, string model, int year, string problemDescription)
+        /// הגשת קריאת תיקון לאחר אימות משתמש
+        public IActionResult SubmitProblem(string username, string email, string company, string model, int year, string problemDescription)
         {
+            // בדיקה אם המשתמש קיים במערכת
+            if (!IsUserValid(username, email))
+            {
+                return new BadRequestObjectResult("User not found in the system.");
+            }
+
             // קריאת רשימת החברות והדגמים
             var vehiclesData = ReadVehiclesListFromFile();
 
             // בדיקה אם החברה והדגם קיימים
-            if (!IsCompanyExists(company) || !IsCarModelExists(company, model))
+            if (!vehiclesData.ContainsKey(company) || !vehiclesData[company].Any(m => (string)m["model"] == model))
             {
                 return new BadRequestObjectResult("Company or model not found in the system.");
             }
 
-            // יצירת קריאה חדשה
+            // יצירת קריאה חדשה עם שם משתמש ואימייל
             var carCall = new Car
             {
+                Username = username,
+                Email = email,
                 Company = company,
                 Model = model,
                 Year = year,

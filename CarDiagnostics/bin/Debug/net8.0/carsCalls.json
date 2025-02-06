@@ -1,90 +1,146 @@
 [
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "Engine is overheating",
-    "UserId": 1
+    "ProblemDescription": "Engine is overheating"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "HOT",
-    "UserId": 1
+    "ProblemDescription": "HOT"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "Engine is overheating",
-    "UserId": 1
+    "ProblemDescription": "Engine is overheating"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "Engine is COLD",
-    "UserId": 1
+    "ProblemDescription": "Engine is COLD"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "Engine is 11COLD",
-    "UserId": 1
+    "ProblemDescription": "Engine is 11COLD"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "TEXT",
-    "UserId": 1
+    "ProblemDescription": "TEXT"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "TEXT1",
-    "UserId": 1
+    "ProblemDescription": "TEXT1"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "TEXDDT1",
-    "UserId": 1
+    "ProblemDescription": "TEXDDT1"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "TEXDDT1",
-    "UserId": 0
+    "ProblemDescription": "TEXDDT1"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2020,
-    "ProblemDescription": "Engine overheating",
-    "UserId": 0
+    "ProblemDescription": "Engine overheating"
   },
   {
     "Id": 0,
+    "Username": "",
+    "Email": "",
     "Company": "Toyota",
     "Model": "Corolla",
     "Year": 2022,
-    "ProblemDescription": "Engine overheating TT",
-    "UserId": 0
+    "ProblemDescription": "Engine overheating TT"
+  },
+  {
+    "Id": 0,
+    "Username": "",
+    "Email": "",
+    "Company": "Toyota",
+    "Model": "Corolla",
+    "Year": 2024,
+    "ProblemDescription": "Engine overheating ++TT"
+  },
+  {
+    "Id": 0,
+    "Username": "",
+    "Email": "",
+    "Company": "Honda",
+    "Model": "Civic",
+    "Year": 2024,
+    "ProblemDescription": "e overheating ++TT"
+  },
+  {
+    "Id": 0,
+    "Username": "john_doe",
+    "Email": "john.doe@example.com",
+    "Company": "Honda",
+    "Model": "Civic",
+    "Year": 2024,
+    "ProblemDescription": "e overheating ++TT"
+  },
+  {
+    "Id": 0,
+    "Username": "john_doeק",
+    "Email": "john.doe@example.com",
+    "Company": "Honda",
+    "Model": "Civic",
+    "Year": 2024,
+    "ProblemDescription": "e overheating ++TT"
+  },
+  {
+    "Id": 0,
+    "Username": "john_doeק",
+    "Email": "john.doe@example.commmmm",
+    "Company": "Honda",
+    "Model": "Civic",
+    "Year": 2024,
+    "ProblemDescription": "e overheating ++TT"
   }
 ]

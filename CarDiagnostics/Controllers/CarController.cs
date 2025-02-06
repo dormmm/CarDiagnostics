@@ -39,31 +39,39 @@ namespace CarDiagnostics.Controllers
 
         // ✅ הגשת קריאת שירות לרכב
         [HttpPost("submitProblem")]
-        public IActionResult SubmitProblem([FromBody] Car car)
+public IActionResult SubmitProblem([FromBody] Car car)
+{
+    try
+    {
+        // בדיקה אם החברה קיימת
+        if (!_carService.IsCompanyExists(car.Company))
         {
-            try
-            {
-                // בדיקה אם החברה קיימת
-                if (!_carService.IsCompanyExists(car.Company))
-                {
-                    return BadRequest(new { Message = "Company not found in the system." });
-                }
-
-                // בדיקה אם הדגם קיים תחת החברה
-                if (!_carService.IsCarModelExists(car.Company, car.Model))
-                {
-                    return BadRequest(new { Message = "Car model not found under this company." });
-                }
-
-                // קריאה לשירות הוספת קריאה למערכת
-                _carService.SubmitProblem(car.Company, car.Model, car.Year, car.ProblemDescription);
-
-                return Ok(new { Message = "Problem submitted successfully!" });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
+            return BadRequest(new { Message = "Company not found in the system." });
         }
+
+        // בדיקה אם הדגם קיים תחת החברה
+        if (!_carService.IsCarModelExists(car.Company, car.Model))
+        {
+            return BadRequest(new { Message = "Car model not found under this company." });
+        }
+
+        // בדיקה אם המשתמש קיים
+        if (!_carService.IsUserValid(car.Username, car.Email))
+        {
+            return BadRequest(new { Message = "User not found in the system." });
+        }
+
+        // קריאה לשירות הוספת קריאה למערכת
+        _carService.SubmitProblem(car.Username, car.Email, car.Company, car.Model, car.Year, car.ProblemDescription);
+
+        return Ok(new { Message = "Problem submitted successfully!" });
+    }
+    catch (System.Exception ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
+
     }
 }
