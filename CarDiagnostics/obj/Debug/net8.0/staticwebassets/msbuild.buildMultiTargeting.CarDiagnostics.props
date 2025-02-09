@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\CarDiagnostics.props" />
-</Project>
