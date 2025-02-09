@@ -142,5 +142,23 @@
     "Model": "Civic",
     "Year": 2024,
     "ProblemDescription": "e overheating ++TT"
+  },
+  {
+    "Id": 0,
+    "Username": "john_doe",
+    "Email": "john.doe@example.com",
+    "Company": "Honda",
+    "Model": "Civic",
+    "Year": 2024,
+    "ProblemDescription": "e overheating ++TT"
+  },
+  {
+    "Id": 0,
+    "Username": "mazore",
+    "Email": "dorre@example.com",
+    "Company": "Honda",
+    "Model": "Civic",
+    "Year": 2024,
+    "ProblemDescription": "car dor"
   }
 ]
