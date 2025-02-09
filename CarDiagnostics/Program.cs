@@ -11,7 +11,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Register CarService
-builder.Services.AddScoped<CarService>();  // הוספת רישום של CarService
+builder.Services.AddScoped<CarService>();  // ׳”׳•׳¡׳₪׳× ׳¨׳™׳©׳•׳ ׳©׳ CarService
+builder.Services.AddScoped<AIService>();  // נ”¹ ׳”׳•׳¡׳£ ׳׳× ׳–׳”
 
 var app = builder.Build();
 
