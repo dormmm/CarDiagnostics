@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "PjRDyCF8zFja4X+F3z+UcgM7GO6Q6rCz6hVqP7eefe0=",
+  "Source": "CarDiagnostics",
+  "BasePath": "_content/CarDiagnostics",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

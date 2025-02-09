@@ -1,0 +1,23 @@
+[
+  {
+    "Id": 1,
+    "Username": "john_doe",
+    "Password": "SecurePass123",
+    "Email": "john.doe@example.com",
+    "Cars": null
+  },
+  {
+    "Id": 2,
+    "Username": "mazore",
+    "Password": "dorrs123",
+    "Email": "dorre@example.com",
+    "Cars": null
+  },
+  {
+    "Id": 3,
+    "Username": "john_doe",
+    "Password": "SecurePass123",
+    "Email": "john.doe@example.com",
+    "Cars": null
+  }
+]
