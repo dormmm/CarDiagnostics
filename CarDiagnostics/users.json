@@ -19,5 +19,12 @@
     "Password": "SecurePass123",
     "Email": "john.doe@example.com",
     "Cars": null
+  },
+  {
+    "Id": 4,
+    "Username": "updatedUser",
+    "Password": "NewSecurePass!",
+    "Email": "updatedemail@example.com",
+    "Cars": null
   }
 ]

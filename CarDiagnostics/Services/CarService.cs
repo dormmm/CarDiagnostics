@@ -20,6 +20,7 @@ namespace CarDiagnostics.Services
             _aiService = aiService;
         }
 
+        // ✅ קריאה מקובץ המשתמשים
         public List<User> ReadUsersFromFile()
         {
             if (!File.Exists(_usersFilePath)) return new List<User>();
@@ -28,6 +29,7 @@ namespace CarDiagnostics.Services
             return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
         }
 
+        // ✅ קריאה מקובץ החברות והדגמים
         public Dictionary<string, List<dynamic>> ReadVehiclesListFromFile()
         {
             if (!File.Exists(_vehiclesListFilePath)) return new Dictionary<string, List<dynamic>>();
@@ -36,6 +38,7 @@ namespace CarDiagnostics.Services
             return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json) ?? new Dictionary<string, List<dynamic>>();
         }
 
+        // ✅ קריאה מקובץ קריאות התקלות
         public List<Car> ReadCarsCallsFromFile()
         {
             if (!File.Exists(_carsCallsFilePath)) return new List<Car>();
@@ -44,18 +47,47 @@ namespace CarDiagnostics.Services
             return JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>();
         }
 
+        // ✅ שמירת קריאות התקלות לקובץ
         public void SaveCarsCallsToFile(List<Car> cars)
         {
             var json = JsonConvert.SerializeObject(cars, Formatting.Indented);
             File.WriteAllText(_carsCallsFilePath, json);
         }
 
+        // ✅ בדיקת תקינות משתמש
         public bool IsUserValid(string username, string email)
         {
             var users = ReadUsersFromFile();
             return users.Any(u => u.Username == username && u.Email == email);
         }
 
+        // ✅ הצגת כל החברות הקיימות במערכת
+        public List<string> GetAllCarCompanies()
+        {
+            return ReadVehiclesListFromFile().Keys.ToList();
+        }
+
+        // ✅ הצגת כל הדגמים של חברה מסוימת
+        public List<string> GetCarModelsByCompany(string company)
+        {
+            var vehiclesData = ReadVehiclesListFromFile();
+
+            if (vehiclesData.ContainsKey(company))
+            {
+                return vehiclesData[company].Select(m => (string)m["model"]).ToList();
+            }
+
+            return new List<string>(); // אם החברה לא קיימת, נחזיר רשימה ריקה
+        }
+
+        // ✅ פונקציה חסרה - בדיקה אם החברה קיימת
+        public bool IsCompanyExists(string company)
+        {
+            var vehiclesData = ReadVehiclesListFromFile();
+            return vehiclesData.ContainsKey(company);
+        }
+
+        // ✅ שליחת בעיה לרכב
         public async Task<IActionResult> SubmitProblemAsync(string username, string email, string company, string model, int year, string problemDescription)
         {
             if (!IsUserValid(username, email))
