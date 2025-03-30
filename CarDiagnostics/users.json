@@ -33,5 +33,12 @@
     "Password": "ddddd",
     "Email": "updatedemail@example.com",
     "Cars": null
+  },
+  {
+    "Id": 6,
+    "Username": "dor",
+    "Password": "$2a$11$viFBrtaI0mHtgFi5wdKUue0uNAVm1c8y.I2UoerkIMlOHfVMhfNRW",
+    "Email": "dor@example.com",
+    "Cars": null
   }
 ]

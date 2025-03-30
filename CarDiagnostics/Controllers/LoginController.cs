@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using System.Linq;
+using BCrypt.Net;
 
 namespace CarDiagnostics.Controllers
 {
@@ -19,11 +20,12 @@ namespace CarDiagnostics.Controllers
         [HttpPost]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            // קבלת המשתמשים דרך IUserService
             var users = _userService.GetAllUsers();
 
-            // בדיקה אם שם המשתמש והסיסמה תואמים
-            var user = users.FirstOrDefault(u => u.Username == request.Username && u.Password == request.Password);
+            var user = users.FirstOrDefault(u =>
+                u.Username == request.Username &&
+                BCrypt.Net.BCrypt.Verify(request.Password, u.Password) // בדיקה עם Hash
+            );
 
             if (user != null)
             {
