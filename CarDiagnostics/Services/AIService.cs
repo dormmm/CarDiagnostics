@@ -47,7 +47,7 @@ namespace CarDiagnostics.Services
             תן אבחנה טכנית, סיווג חומרה והערכת מחיר.
         "}
     },
-            temperature = 0.7,
+            temperature = 0.4,
             max_tokens = 400 // ✅ מגביל את כמות המילים בתשובה
         };
 

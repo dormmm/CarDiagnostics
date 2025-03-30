@@ -1,4 +1,6 @@
 using CarDiagnostics.Services;
+using CarDiagnostics.Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,11 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Register CarService
 builder.Services.AddScoped<CarService>();  // ׳”׳•׳¡׳₪׳× ׳¨׳™׳©׳•׳ ׳©׳ CarService
 builder.Services.AddScoped<AIService>();  // נ”¹ ׳”׳•׳¡׳£ ׳׳× ׳–׳”
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<VehicleRepository>();
+builder.Services.AddScoped<CarsCallsRepository>();
+
+
 
 var app = builder.Build();
 
