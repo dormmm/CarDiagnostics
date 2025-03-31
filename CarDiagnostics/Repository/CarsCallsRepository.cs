@@ -4,17 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace CarDiagnostics.Repository
 {
     public class CarsCallsRepository
     {
-        private readonly string _filePath = "carsCalls.json";
+        private readonly string _filePath;
         private readonly object _lock = new object();
         private readonly ILogger<CarsCallsRepository> _logger;
 
-        public CarsCallsRepository(ILogger<CarsCallsRepository> logger)
+        public CarsCallsRepository(IConfiguration configuration, ILogger<CarsCallsRepository> logger)
         {
+            _filePath = configuration["FilePaths:CarsCalls"] ?? throw new Exception("Missing config for FilePaths:CarsCalls");
             _logger = logger;
         }
 

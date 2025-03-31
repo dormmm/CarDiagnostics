@@ -5,17 +5,19 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace CarDiagnostics.Repository
 {
     public class UserRepository
     {
-        private readonly string _usersFilePath = "users.json";
+        private readonly string _filePath;
         private readonly ReaderWriterLockSlim _lock = new();
         private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(ILogger<UserRepository> logger)
+        public UserRepository(IConfiguration configuration, ILogger<UserRepository> logger)
         {
+            _filePath = configuration["FilePaths:Users"] ?? throw new Exception("Missing config for FilePaths:Users");
             _logger = logger;
         }
 
@@ -24,15 +26,15 @@ namespace CarDiagnostics.Repository
             _lock.EnterReadLock();
             try
             {
-                if (!File.Exists(_usersFilePath))
+                if (!File.Exists(_filePath))
                     return new List<User>();
 
-                var json = File.ReadAllText(_usersFilePath);
+                var json = File.ReadAllText(_filePath);
                 return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error reading users from file: {FilePath}", _usersFilePath);
+                _logger.LogError(ex, "Error reading users from file.");
                 return new List<User>();
             }
             finally

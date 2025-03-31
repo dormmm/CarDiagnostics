@@ -4,17 +4,19 @@ using System.IO;
 using System.Linq;
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace CarDiagnostics.Repository
 {
     public class VehicleRepository
     {
-        private readonly string _vehiclesListFilePath = "vehiclesList.json";
+        private readonly string _filePath;
         private readonly object _lock = new object();
         private readonly ILogger<VehicleRepository> _logger;
 
-        public VehicleRepository(ILogger<VehicleRepository> logger)
+        public VehicleRepository(IConfiguration configuration, ILogger<VehicleRepository> logger)
         {
+            _filePath = configuration["FilePaths:Vehicles"] ?? throw new Exception("Missing config for FilePaths:Vehicles");
             _logger = logger;
         }
 
@@ -24,16 +26,16 @@ namespace CarDiagnostics.Repository
             {
                 try
                 {
-                    if (!File.Exists(_vehiclesListFilePath))
+                    if (!File.Exists(_filePath))
                         return new Dictionary<string, List<dynamic>>();
 
-                    var json = File.ReadAllText(_vehiclesListFilePath);
+                    var json = File.ReadAllText(_filePath);
                     return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json)
                         ?? new Dictionary<string, List<dynamic>>();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error reading vehicles list from {FilePath}", _vehiclesListFilePath);
+                    _logger.LogError(ex, "Error reading vehicles list from {FilePath}", _filePath);
                     return new Dictionary<string, List<dynamic>>();
                 }
             }

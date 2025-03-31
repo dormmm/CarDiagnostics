@@ -22,9 +22,9 @@
   },
   {
     "Id": 4,
-    "Username": "updatedUser",
-    "Password": "NewSecurePass!",
-    "Email": "updatedemail@example.com",
+    "Username": "micc",
+    "Password": "$2a$11$lRN9nQ7Xwipf0m5uSrOYmOuhiXeJUEAeEJfGMI4WxmeHwzdJrTlkK",
+    "Email": "updated@example.com",
     "Cars": null
   },
   {
@@ -39,6 +39,13 @@
     "Username": "dor",
     "Password": "$2a$11$viFBrtaI0mHtgFi5wdKUue0uNAVm1c8y.I2UoerkIMlOHfVMhfNRW",
     "Email": "dor@example.com",
+    "Cars": null
+  },
+  {
+    "Id": 7,
+    "Username": "mic",
+    "Password": "$2a$11$P9qiUfOf4FiNWBZHcOSe4u/3KEMjQ6U4OR6QlpbYVcw0sV57B/xom",
+    "Email": "mic@example.com",
     "Cars": null
   }
 ]
