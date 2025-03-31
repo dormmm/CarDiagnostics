@@ -1,91 +1,59 @@
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.IO;
 using CarDiagnostics.Models;
-using BCrypt.Net;
+using CarDiagnostics.Repository;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace CarDiagnostics.Services
 {
     public class UserService : IUserService
     {
-        private readonly string _filePath = "users.json";
+        private readonly UserRepository _userRepository;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(ILogger<UserService> logger)
+        public UserService(UserRepository userRepository, ILogger<UserService> logger)
         {
+            _userRepository = userRepository;
             _logger = logger;
-        }
-
-        private List<User> ReadUsersFromFile()
-        {
-            try
-            {
-                if (!File.Exists(_filePath))
-                {
-                    return new List<User>();
-                }
-
-                var json = File.ReadAllText(_filePath);
-                return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error reading users from file.");
-                return new List<User>(); // מונע קריסה
-            }
-        }
-
-        private void SaveUsersToFile(List<User> users)
-        {
-            try
-            {
-                var json = JsonConvert.SerializeObject(users, Formatting.Indented);
-                File.WriteAllText(_filePath, json);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error saving users to file.");
-                // כאן אפשר להוסיף טיפול נוסף לפי הצורך
-            }
-        }
-
-        public void Register(string username, string password, string email)
-        {
-            var users = ReadUsersFromFile();
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-            var user = new User
-            {
-                Id = users.Count + 1,
-                Username = username,
-                Password = hashedPassword,
-                Email = email
-            };
-
-            users.Add(user);
-            SaveUsersToFile(users);
         }
 
         public List<User> GetAllUsers()
         {
-            return ReadUsersFromFile();
+            return _userRepository.GetAllUsers();
         }
 
-        public void UpdateUserProfile(int userId, string name, string email, string password = null)
+        public void Register(string username, string password, string email)
         {
-            var users = ReadUsersFromFile();
+            var users = _userRepository.GetAllUsers();
+
+            var newUser = new User
+            {
+                Id = users.Count + 1,
+                Username = username,
+                Password = BCrypt.Net.BCrypt.HashPassword(password),
+                Email = email
+            };
+
+            users.Add(newUser);
+
+            _userRepository.SaveUsers(users);
+            _logger.LogInformation("User registered: {Username}", username);
+        }
+
+        public void UpdateUserProfile(int userId, string username, string email, string password)
+        {
+            var users = _userRepository.GetAllUsers();
             var user = users.Find(u => u.Id == userId);
             if (user != null)
             {
-                user.Username = name;
+                user.Username = username;
                 user.Email = email;
                 if (!string.IsNullOrEmpty(password))
                 {
                     user.Password = BCrypt.Net.BCrypt.HashPassword(password);
                 }
 
-                SaveUsersToFile(users);
+                _userRepository.SaveUsers(users);
+                _logger.LogInformation("User profile updated: ID {UserId}", userId);
             }
         }
     }

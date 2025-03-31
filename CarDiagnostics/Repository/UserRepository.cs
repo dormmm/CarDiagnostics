@@ -43,6 +43,25 @@ namespace CarDiagnostics.Repository
             }
         }
 
+        public void SaveUsers(List<User> users)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                var json = JsonConvert.SerializeObject(users, Formatting.Indented);
+                File.WriteAllText(_filePath, json);
+                _logger.LogInformation("Users saved successfully to {FilePath}", _filePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving users to file.");
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
         public bool IsValidUser(string username, string email)
         {
             var users = GetAllUsers();
