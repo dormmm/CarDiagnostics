@@ -3,34 +3,57 @@ using System.Collections.Generic;
 using System.IO;
 using CarDiagnostics.Models;
 using BCrypt.Net;
+using Microsoft.Extensions.Logging;
 
 namespace CarDiagnostics.Services
 {
     public class UserService : IUserService
     {
         private readonly string _filePath = "users.json";
+        private readonly ILogger<UserService> _logger;
+
+        public UserService(ILogger<UserService> logger)
+        {
+            _logger = logger;
+        }
 
         private List<User> ReadUsersFromFile()
         {
-            if (!File.Exists(_filePath))
+            try
             {
-                return new List<User>();
-            }
+                if (!File.Exists(_filePath))
+                {
+                    return new List<User>();
+                }
 
-            var json = File.ReadAllText(_filePath);
-            return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
+                var json = File.ReadAllText(_filePath);
+                return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading users from file.");
+                return new List<User>(); // מונע קריסה
+            }
         }
 
         private void SaveUsersToFile(List<User> users)
         {
-            var json = JsonConvert.SerializeObject(users, Formatting.Indented);
-            File.WriteAllText(_filePath, json);
+            try
+            {
+                var json = JsonConvert.SerializeObject(users, Formatting.Indented);
+                File.WriteAllText(_filePath, json);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving users to file.");
+                // כאן אפשר להוסיף טיפול נוסף לפי הצורך
+            }
         }
 
         public void Register(string username, string password, string email)
         {
             var users = ReadUsersFromFile();
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password); // הצפנת הסיסמה
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
             var user = new User
             {
@@ -59,7 +82,7 @@ namespace CarDiagnostics.Services
                 user.Email = email;
                 if (!string.IsNullOrEmpty(password))
                 {
-                    user.Password = BCrypt.Net.BCrypt.HashPassword(password); // הצפנה גם בשינוי סיסמה
+                    user.Password = BCrypt.Net.BCrypt.HashPassword(password);
                 }
 
                 SaveUsersToFile(users);

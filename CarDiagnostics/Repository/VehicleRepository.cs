@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace CarDiagnostics.Repository
 {
@@ -10,6 +11,12 @@ namespace CarDiagnostics.Repository
     {
         private readonly string _vehiclesListFilePath = "vehiclesList.json";
         private readonly object _lock = new object();
+        private readonly ILogger<VehicleRepository> _logger;
+
+        public VehicleRepository(ILogger<VehicleRepository> logger)
+        {
+            _logger = logger;
+        }
 
         public Dictionary<string, List<dynamic>> GetAllVehicles()
         {
@@ -21,11 +28,12 @@ namespace CarDiagnostics.Repository
                         return new Dictionary<string, List<dynamic>>();
 
                     var json = File.ReadAllText(_vehiclesListFilePath);
-                    return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json) ?? new Dictionary<string, List<dynamic>>();
+                    return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json)
+                        ?? new Dictionary<string, List<dynamic>>();
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error reading vehicles list: " + ex.Message);
+                    _logger.LogError(ex, "Error reading vehicles list from {FilePath}", _vehiclesListFilePath);
                     return new Dictionary<string, List<dynamic>>();
                 }
             }
@@ -43,7 +51,6 @@ namespace CarDiagnostics.Repository
             return data.ContainsKey(company) && data[company].Any(m => (string)m["model"] == model);
         }
 
-        // ✅ המתודה שחסרה אצלך!
         public List<string> GetModelsByCompany(string company)
         {
             var data = GetAllVehicles();

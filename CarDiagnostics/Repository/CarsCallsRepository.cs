@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace CarDiagnostics.Repository
 {
@@ -10,6 +11,12 @@ namespace CarDiagnostics.Repository
     {
         private readonly string _filePath = "carsCalls.json";
         private readonly object _lock = new object();
+        private readonly ILogger<CarsCallsRepository> _logger;
+
+        public CarsCallsRepository(ILogger<CarsCallsRepository> logger)
+        {
+            _logger = logger;
+        }
 
         public List<Car> ReadCalls()
         {
@@ -25,7 +32,7 @@ namespace CarDiagnostics.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error reading carsCalls: " + ex.Message);
+                    _logger.LogError(ex, "Error reading carsCalls from {FilePath}", _filePath);
                     return new List<Car>();
                 }
             }
@@ -42,7 +49,7 @@ namespace CarDiagnostics.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error saving carsCalls: " + ex.Message);
+                    _logger.LogError(ex, "Error saving carsCalls to {FilePath}", _filePath);
                 }
             }
         }
