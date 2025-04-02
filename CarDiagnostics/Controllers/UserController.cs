@@ -1,12 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CarDiagnostics.Services;
-using CarDiagnostics.Models;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using CarDiagnostics.DTO;  // ייבוא המודלים מ-DTO
-
-
-
+using CarDiagnostics.DTO;
+using System;
 
 namespace CarDiagnostics.Controllers
 {
@@ -21,28 +16,36 @@ namespace CarDiagnostics.Controllers
             _userService = userService;
         }
 
-        // הצגת כל המשתמשים
         [HttpGet("users")]
         public IActionResult GetUsers()
         {
-            var users = _userService.GetAllUsers();  // מקבל את כל המשתמשים מהשירות
-            return Ok(users);  // מחזיר את רשימת המשתמשים
+            var users = _userService.GetAllUsers();
+            return Ok(users);
         }
 
-        // רישום משתמש חדש
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
-            _userService.Register(request.Username, request.Password, request.Email);  // רושם את המשתמש החדש
-            return Ok(new { Message = "User registered successfully" });  // מחזיר הודעה שהמשתמש נרשם בהצלחה
+            _userService.Register(request.Username, request.Password, request.Email);
+            return Ok(new { Message = "User registered successfully" });
         }
 
-        // עדכון פרטי משתמש
         [HttpPut("update/{id}")]
         public IActionResult UpdateUserProfile(int id, [FromBody] UpdateUserProfileRequest request)
         {
-            _userService.UpdateUserProfile(id, request.Username, request.Email, request.Password);  // מעדכן את פרטי המשתמש
-            return Ok(new { Message = "User profile updated successfully" });  // מחזיר הודעה שהפרופיל עודכן בהצלחה
+            try
+            {
+                _userService.UpdateUserProfile(id, request.Username, request.Email, request.Password);
+                return Ok(new { Message = "User profile updated successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "An unexpected error occurred." });
+            }
         }
     }
 }

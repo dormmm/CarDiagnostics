@@ -37,6 +37,12 @@ namespace CarDiagnostics.Services
         {
             return _vehicleRepository.IsCompanyExists(company);
         }
+        public bool IsModelExists(string company, string model)
+{
+    var companyModels = _vehicleRepository.GetModelsByCompany(company);
+    return companyModels.Contains(model);
+}
+
 
         public async Task<IActionResult> SubmitProblemAsync(string username, string email, string company, string model, int year, string problemDescription)
         {

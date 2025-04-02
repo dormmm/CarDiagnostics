@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using System.Linq;
-using BCrypt.Net;
+using System;
 
 namespace CarDiagnostics.Controllers
 {
@@ -20,19 +20,34 @@ namespace CarDiagnostics.Controllers
         [HttpPost]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var users = _userService.GetAllUsers();
-
-            var user = users.FirstOrDefault(u =>
-                u.Username == request.Username &&
-                BCrypt.Net.BCrypt.Verify(request.Password, u.Password) // בדיקה עם Hash
-            );
-
-            if (user != null)
+            try
             {
-                return Ok(new { Message = "Login successful" });
-            }
+                var users = _userService.GetAllUsers();
+                var user = users.FirstOrDefault(u => u.Username == request.Username);
 
-            return Unauthorized(new { Message = "Username or password is incorrect" });
+                if (user == null)
+                {
+                    return NotFound(new { Error = "User not found" });
+                }
+
+                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.Password);
+                if (!isPasswordValid)
+                {
+                    return Unauthorized(new { Error = "Invalid password" });
+                }
+
+                return Ok(new
+                {
+                    Message = "Login successful",
+                    UserId = user.Id,
+                    Username = user.Username,
+                    Email = user.Email
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "An unexpected error occurred." });
+            }
         }
     }
 }
