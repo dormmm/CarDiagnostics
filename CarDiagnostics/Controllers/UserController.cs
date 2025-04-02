@@ -18,15 +18,15 @@ namespace CarDiagnostics.Controllers
             _userService = userService;
         }
 
-        // הצגת כל המשתמשים
         [HttpGet("users")]
         public IActionResult GetUsers()
         {
             var users = _userService.GetAllUsers();
             return Ok(users);
+            var users = _userService.GetAllUsers();
+            return Ok(users);
         }
 
-        // רישום משתמש חדש
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
@@ -39,7 +39,6 @@ namespace CarDiagnostics.Controllers
             return Ok(new { Message = "User registered successfully" });
         }
 
-        // עדכון פרטי משתמש
         [HttpPut("update/{id}")]
         public IActionResult UpdateUserProfile(int id, [FromBody] UpdateUserProfileRequest request)
         {

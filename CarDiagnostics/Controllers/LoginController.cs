@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using System.Linq;
-using BCrypt.Net;
+using System;
 
 namespace CarDiagnostics.Controllers
 {
