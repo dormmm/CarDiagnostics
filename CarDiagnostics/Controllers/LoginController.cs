@@ -20,11 +20,15 @@ namespace CarDiagnostics.Controllers
         [HttpPost]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var users = _userService.GetAllUsers();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
+            var users = _userService.GetAllUsers();
             var user = users.FirstOrDefault(u =>
                 u.Username == request.Username &&
-                BCrypt.Net.BCrypt.Verify(request.Password, u.Password) // בדיקה עם Hash
+                BCrypt.Net.BCrypt.Verify(request.Password, u.Password)
             );
 
             if (user != null)

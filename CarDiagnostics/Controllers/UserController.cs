@@ -3,10 +3,7 @@ using CarDiagnostics.Services;
 using CarDiagnostics.Models;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using CarDiagnostics.DTO;  // ייבוא המודלים מ-DTO
-
-
-
+using CarDiagnostics.DTO;
 
 namespace CarDiagnostics.Controllers
 {
@@ -25,24 +22,34 @@ namespace CarDiagnostics.Controllers
         [HttpGet("users")]
         public IActionResult GetUsers()
         {
-            var users = _userService.GetAllUsers();  // מקבל את כל המשתמשים מהשירות
-            return Ok(users);  // מחזיר את רשימת המשתמשים
+            var users = _userService.GetAllUsers();
+            return Ok(users);
         }
 
         // רישום משתמש חדש
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
-            _userService.Register(request.Username, request.Password, request.Email);  // רושם את המשתמש החדש
-            return Ok(new { Message = "User registered successfully" });  // מחזיר הודעה שהמשתמש נרשם בהצלחה
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _userService.Register(request.Username, request.Password, request.Email);
+            return Ok(new { Message = "User registered successfully" });
         }
 
         // עדכון פרטי משתמש
         [HttpPut("update/{id}")]
         public IActionResult UpdateUserProfile(int id, [FromBody] UpdateUserProfileRequest request)
         {
-            _userService.UpdateUserProfile(id, request.Username, request.Email, request.Password);  // מעדכן את פרטי המשתמש
-            return Ok(new { Message = "User profile updated successfully" });  // מחזיר הודעה שהפרופיל עודכן בהצלחה
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _userService.UpdateUserProfile(id, request.Username, request.Email, request.Password);
+            return Ok(new { Message = "User profile updated successfully" });
         }
     }
 }

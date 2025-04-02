@@ -17,11 +17,23 @@ namespace CarDiagnostics.Controllers
             _carService = carService;
         }
 
-        // ✅ שליחת בעיה חדשה למערכת
+        // ✅ שליחת בעיה חדשה למערכת עם בדיקת תקינות הקלט
         [HttpPost("submitProblem")]
         public async Task<IActionResult> SubmitProblem([FromBody] Car car)
         {
-            return await _carService.SubmitProblemAsync(car.Username, car.Email, car.Company, car.Model, car.Year, car.ProblemDescription);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return await _carService.SubmitProblemAsync(
+                car.Username,
+                car.Email,
+                car.Company,
+                car.Model,
+                car.Year,
+                car.ProblemDescription
+            );
         }
 
         // ✅ הצגת כל החברות הקיימות במערכת

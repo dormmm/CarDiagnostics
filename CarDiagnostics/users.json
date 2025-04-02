@@ -47,5 +47,19 @@
     "Password": "$2a$11$P9qiUfOf4FiNWBZHcOSe4u/3KEMjQ6U4OR6QlpbYVcw0sV57B/xom",
     "Email": "mic@example.com",
     "Cars": null
+  },
+  {
+    "Id": 8,
+    "Username": "dor",
+    "Password": "$2a$11$VYZ7KsPeuls3YRHe1kPeWuIGjO0cEf82k8vb8XJoCpqYWYYE5xHJW",
+    "Email": "dor@example.com",
+    "Cars": null
+  },
+  {
+    "Id": 9,
+    "Username": "dormazor",
+    "Password": "$2a$11$dQL.ofpokYo3Rj3o8lVsROyeup0HBe2U1JArpShS8dADH1.UyNM/q",
+    "Email": "dor@example.com",
+    "Cars": null
   }
 ]

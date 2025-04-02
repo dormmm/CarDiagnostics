@@ -3,19 +3,16 @@ using CarDiagnostics.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient(); // לאי-סיודיי
 
-builder.Services.AddHttpClient(); // ⬅️ שורה חדשה – חובה!
-
-// Register IUserService
+// Register Application Services
 builder.Services.AddScoped<IUserService, UserService>();
-
-// Register Services
 builder.Services.AddScoped<CarService>();
-builder.Services.AddScoped<AIService>(); // עכשיו יקבל את IHttpClientFactory
+builder.Services.AddScoped<AIService>();
 
 // Register Repositories
 builder.Services.AddScoped<UserRepository>();
@@ -24,14 +21,15 @@ builder.Services.AddScoped<CarsCallsRepository>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Optional: disable HTTPS redirect if not needed locally
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
