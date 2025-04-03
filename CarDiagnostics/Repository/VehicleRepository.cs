@@ -5,6 +5,7 @@ using System.Linq;
 using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using CarDiagnostics.Models;
 
 namespace CarDiagnostics.Repository
 {
@@ -20,23 +21,23 @@ namespace CarDiagnostics.Repository
             _logger = logger;
         }
 
-        public Dictionary<string, List<dynamic>> GetAllVehicles()
+        public VehicleList GetAllVehicles()
         {
             lock (_lock)
             {
                 try
                 {
                     if (!File.Exists(_filePath))
-                        return new Dictionary<string, List<dynamic>>();
+                        return new VehicleList();
 
                     var json = File.ReadAllText(_filePath);
-                    return JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(json)
-                        ?? new Dictionary<string, List<dynamic>>();
+                    return JsonConvert.DeserializeObject<VehicleList>(json)
+                        ?? new VehicleList();
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error reading vehicles list from {FilePath}", _filePath);
-                    return new Dictionary<string, List<dynamic>>();
+                    return new VehicleList();
                 }
             }
         }
@@ -50,7 +51,7 @@ namespace CarDiagnostics.Repository
         public bool IsModelExists(string company, string model)
         {
             var data = GetAllVehicles();
-            return data.ContainsKey(company) && data[company].Any(m => (string)m["model"] == model);
+            return data.ContainsKey(company) && data[company].Any(m => m.model == model);
         }
 
         public List<string> GetModelsByCompany(string company)
@@ -59,7 +60,7 @@ namespace CarDiagnostics.Repository
 
             if (data.ContainsKey(company))
             {
-                return data[company].Select(m => (string)m["model"]).ToList();
+                return data[company].Select(m => m.model).ToList();
             }
 
             return new List<string>();

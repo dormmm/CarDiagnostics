@@ -23,8 +23,7 @@ namespace CarDiagnostics.Controllers
         {
             var users = _userService.GetAllUsers();
             return Ok(users);
-            var users = _userService.GetAllUsers();
-            return Ok(users);
+            
         }
 
         [HttpPost("register")]
