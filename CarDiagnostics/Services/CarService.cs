@@ -23,35 +23,36 @@ namespace CarDiagnostics.Services
             _carsCallsRepository = carsCallsRepository;
         }
 
-        public List<string> GetAllCarCompanies()
+        public async Task<List<string>> GetAllCarCompaniesAsync()
         {
-            return _vehicleRepository.GetAllVehicles().Keys.ToList();
+            var data = await _vehicleRepository.GetAllVehiclesAsync();
+            return data.Keys.ToList();
         }
 
-        public List<string> GetCarModelsByCompany(string company)
+        public async Task<List<string>> GetCarModelsByCompanyAsync(string company)
         {
-            return _vehicleRepository.GetModelsByCompany(company);
+            return await _vehicleRepository.GetModelsByCompanyAsync(company);
         }
 
-        public bool IsCompanyExists(string company)
+        public async Task<bool> IsCompanyExistsAsync(string company)
         {
-            return _vehicleRepository.IsCompanyExists(company);
+            return await _vehicleRepository.IsCompanyExistsAsync(company);
         }
-        public bool IsModelExists(string company, string model)
-{
-    var companyModels = _vehicleRepository.GetModelsByCompany(company);
-    return companyModels.Contains(model);
-}
 
+        public async Task<bool> IsModelExistsAsync(string company, string model)
+        {
+            var companyModels = await _vehicleRepository.GetModelsByCompanyAsync(company);
+            return companyModels.Contains(model);
+        }
 
         public async Task<IActionResult> SubmitProblemAsync(string username, string email, string company, string model, int year, string problemDescription)
         {
-            if (!_userRepository.IsValidUser(username, email))
+            if (!await _userRepository.IsValidUserAsync(username, email))
             {
                 return new BadRequestObjectResult("User not found in the system.");
             }
 
-            if (!_vehicleRepository.IsModelExists(company, model))
+            if (!await _vehicleRepository.IsModelExistsAsync(company, model))
             {
                 return new BadRequestObjectResult("Company or model not found in the system.");
             }
@@ -69,9 +70,9 @@ namespace CarDiagnostics.Services
                 AIResponse = diagnosis
             };
 
-            var existingCalls = _carsCallsRepository.ReadCalls();
+            var existingCalls = await _carsCallsRepository.ReadCallsAsync();
             existingCalls.Add(carCall);
-            _carsCallsRepository.SaveCalls(existingCalls);
+            await _carsCallsRepository.SaveCallsAsync(existingCalls);
 
             return new OkObjectResult(new { Message = "Problem submitted successfully!", AI_Diagnosis = diagnosis });
         }

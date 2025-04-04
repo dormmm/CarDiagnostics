@@ -1,12 +1,14 @@
-using System.Collections.Generic;
 using CarDiagnostics.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CarDiagnostics.Services
 {
     public interface IUserService
     {
-        void Register(string username, string password, string email);
-        List<User> GetAllUsers();
-        void UpdateUserProfile(int userId, string name, string email, string password = null); // פונקציה לעדכון פרטי משתמש
+        Task<List<User>> GetAllUsersAsync();
+        Task RegisterAsync(string username, string password, string email);
+        Task UpdateUserProfileAsync(int userId, string username, string email, string password);
+        Task<bool> IsValidUserAsync(string username, string email);
     }
 }

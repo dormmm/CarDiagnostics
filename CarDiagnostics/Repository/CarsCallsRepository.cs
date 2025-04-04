@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 
@@ -11,7 +12,6 @@ namespace CarDiagnostics.Repository
     public class CarsCallsRepository
     {
         private readonly string _filePath;
-        private readonly object _lock = new object();
         private readonly ILogger<CarsCallsRepository> _logger;
 
         public CarsCallsRepository(IConfiguration configuration, ILogger<CarsCallsRepository> logger)
@@ -20,39 +20,33 @@ namespace CarDiagnostics.Repository
             _logger = logger;
         }
 
-        public List<Car> ReadCalls()
+        public async Task<List<Car>> ReadCallsAsync()
         {
-            lock (_lock)
+            try
             {
-                try
-                {
-                    if (!File.Exists(_filePath))
-                        return new List<Car>();
-
-                    var json = File.ReadAllText(_filePath);
-                    return JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error reading carsCalls from {FilePath}", _filePath);
+                if (!File.Exists(_filePath))
                     return new List<Car>();
-                }
+
+                var json = await File.ReadAllTextAsync(_filePath);
+                return JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading carsCalls from {FilePath}", _filePath);
+                return new List<Car>();
             }
         }
 
-        public void SaveCalls(List<Car> calls)
+        public async Task SaveCallsAsync(List<Car> calls)
         {
-            lock (_lock)
+            try
             {
-                try
-                {
-                    var json = JsonConvert.SerializeObject(calls, Formatting.Indented);
-                    File.WriteAllText(_filePath, json);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error saving carsCalls to {FilePath}", _filePath);
-                }
+                var json = JsonConvert.SerializeObject(calls, Formatting.Indented);
+                await File.WriteAllTextAsync(_filePath, json);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving carsCalls to {FilePath}", _filePath);
             }
         }
     }

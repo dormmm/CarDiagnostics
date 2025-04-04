@@ -1,7 +1,6 @@
 using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CarDiagnostics.Controllers
@@ -38,22 +37,22 @@ namespace CarDiagnostics.Controllers
 
         // ✅ הצגת כל החברות הקיימות במערכת
         [HttpGet("getCarCompanies")]
-        public IActionResult GetCarCompanies()
+        public async Task<IActionResult> GetCarCompanies()
         {
-            var companies = _carService.GetAllCarCompanies();
+            var companies = await _carService.GetAllCarCompaniesAsync();
             return Ok(companies);
         }
 
         // ✅ הצגת כל הדגמים של חברה מסוימת
         [HttpGet("getCarModels/{company}")]
-        public IActionResult GetCarModels(string company)
+        public async Task<IActionResult> GetCarModels(string company)
         {
-            if (!_carService.IsCompanyExists(company))
+            if (!await _carService.IsCompanyExistsAsync(company))
             {
                 return NotFound(new { Message = "Company not found in the system." });
             }
 
-            var models = _carService.GetCarModelsByCompany(company);
+            var models = await _carService.GetCarModelsByCompanyAsync(company);
             return Ok(models);
         }
     }

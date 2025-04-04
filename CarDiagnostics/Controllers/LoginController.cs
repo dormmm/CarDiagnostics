@@ -3,6 +3,7 @@ using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using System.Linq;
 using System;
+using System.Threading.Tasks;
 
 namespace CarDiagnostics.Controllers
 {
@@ -18,14 +19,14 @@ namespace CarDiagnostics.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var users = _userService.GetAllUsers();
+            var users = await _userService.GetAllUsersAsync(); // ⚠️ מתודה אסינכרונית
             var user = users.FirstOrDefault(u =>
                 u.Username == request.Username &&
                 BCrypt.Net.BCrypt.Verify(request.Password, u.Password)

@@ -3,6 +3,7 @@ using CarDiagnostics.Repository;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BCrypt.Net;
 
 namespace CarDiagnostics.Services
@@ -18,14 +19,14 @@ namespace CarDiagnostics.Services
             _logger = logger;
         }
 
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsersAsync()
         {
-            return _userRepository.GetAllUsers();
+            return await _userRepository.GetAllUsersAsync();
         }
 
-        public void Register(string username, string password, string email)
+        public async Task RegisterAsync(string username, string password, string email)
         {
-            var users = _userRepository.GetAllUsers();
+            var users = await _userRepository.GetAllUsersAsync();
 
             var newUser = new User
             {
@@ -36,14 +37,14 @@ namespace CarDiagnostics.Services
             };
 
             users.Add(newUser);
-            _userRepository.SaveUsers(users);
+            await _userRepository.SaveUsersAsync(users);
 
             _logger.LogInformation("User registered: {Username}", username);
         }
 
-        public void UpdateUserProfile(int userId, string username, string email, string password)
+        public async Task UpdateUserProfileAsync(int userId, string username, string email, string password)
         {
-            var users = _userRepository.GetAllUsers();
+            var users = await _userRepository.GetAllUsersAsync();
             var user = users.FirstOrDefault(u => u.Id == userId);
 
             if (user == null)
@@ -60,8 +61,14 @@ namespace CarDiagnostics.Services
                 user.Password = BCrypt.Net.BCrypt.HashPassword(password);
             }
 
-            _userRepository.SaveUsers(users);
+            await _userRepository.SaveUsersAsync(users);
             _logger.LogInformation("User profile updated: ID {UserId}", userId);
+        }
+
+        public async Task<bool> IsValidUserAsync(string username, string email)
+        {
+            var users = await _userRepository.GetAllUsersAsync();
+            return users.Any(u => u.Username == username && u.Email == email);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using CarDiagnostics.Models;
@@ -12,7 +13,6 @@ namespace CarDiagnostics.Repository
     public class VehicleRepository
     {
         private readonly string _filePath;
-        private readonly object _lock = new object();
         private readonly ILogger<VehicleRepository> _logger;
 
         public VehicleRepository(IConfiguration configuration, ILogger<VehicleRepository> logger)
@@ -21,42 +21,38 @@ namespace CarDiagnostics.Repository
             _logger = logger;
         }
 
-        public VehicleList GetAllVehicles()
+        public async Task<VehicleList> GetAllVehiclesAsync()
         {
-            lock (_lock)
+            try
             {
-                try
-                {
-                    if (!File.Exists(_filePath))
-                        return new VehicleList();
-
-                    var json = File.ReadAllText(_filePath);
-                    return JsonConvert.DeserializeObject<VehicleList>(json)
-                        ?? new VehicleList();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error reading vehicles list from {FilePath}", _filePath);
+                if (!File.Exists(_filePath))
                     return new VehicleList();
-                }
+
+                var json = await File.ReadAllTextAsync(_filePath);
+                return JsonConvert.DeserializeObject<VehicleList>(json) ?? new VehicleList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading vehicles list from {FilePath}", _filePath);
+                return new VehicleList();
             }
         }
 
-        public bool IsCompanyExists(string company)
+        public async Task<bool> IsCompanyExistsAsync(string company)
         {
-            var data = GetAllVehicles();
+            var data = await GetAllVehiclesAsync();
             return data.ContainsKey(company);
         }
 
-        public bool IsModelExists(string company, string model)
+        public async Task<bool> IsModelExistsAsync(string company, string model)
         {
-            var data = GetAllVehicles();
+            var data = await GetAllVehiclesAsync();
             return data.ContainsKey(company) && data[company].Any(m => m.model == model);
         }
 
-        public List<string> GetModelsByCompany(string company)
+        public async Task<List<string>> GetModelsByCompanyAsync(string company)
         {
-            var data = GetAllVehicles();
+            var data = await GetAllVehiclesAsync();
 
             if (data.ContainsKey(company))
             {
@@ -66,9 +62,9 @@ namespace CarDiagnostics.Repository
             return new List<string>();
         }
 
-        public List<string> GetAllCompanies()
+        public async Task<List<string>> GetAllCompaniesAsync()
         {
-            var data = GetAllVehicles();
+            var data = await GetAllVehiclesAsync();
             return data.Keys.ToList();
         }
     }

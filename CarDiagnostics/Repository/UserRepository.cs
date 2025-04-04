@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 
@@ -12,7 +13,7 @@ namespace CarDiagnostics.Repository
     public class UserRepository
     {
         private readonly string _filePath;
-        private readonly ReaderWriterLockSlim _lock = new();
+        private readonly SemaphoreSlim _semaphore = new(1, 1);  // ✅ תחליף ל-ReaderWriterLockSlim
         private readonly ILogger<UserRepository> _logger;
 
         public UserRepository(IConfiguration configuration, ILogger<UserRepository> logger)
@@ -21,15 +22,15 @@ namespace CarDiagnostics.Repository
             _logger = logger;
         }
 
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsersAsync()
         {
-            _lock.EnterReadLock();
+            await _semaphore.WaitAsync();
             try
             {
                 if (!File.Exists(_filePath))
                     return new List<User>();
 
-                var json = File.ReadAllText(_filePath);
+                var json = await File.ReadAllTextAsync(_filePath);
                 return JsonConvert.DeserializeObject<List<User>>(json) ?? new List<User>();
             }
             catch (Exception ex)
@@ -39,17 +40,17 @@ namespace CarDiagnostics.Repository
             }
             finally
             {
-                _lock.ExitReadLock();
+                _semaphore.Release();
             }
         }
 
-        public void SaveUsers(List<User> users)
+        public async Task SaveUsersAsync(List<User> users)
         {
-            _lock.EnterWriteLock();
+            await _semaphore.WaitAsync();
             try
             {
                 var json = JsonConvert.SerializeObject(users, Formatting.Indented);
-                File.WriteAllText(_filePath, json);
+                await File.WriteAllTextAsync(_filePath, json);
                 _logger.LogInformation("Users saved successfully to {FilePath}", _filePath);
             }
             catch (Exception ex)
@@ -58,13 +59,13 @@ namespace CarDiagnostics.Repository
             }
             finally
             {
-                _lock.ExitWriteLock();
+                _semaphore.Release();
             }
         }
 
-        public bool IsValidUser(string username, string email)
+        public async Task<bool> IsValidUserAsync(string username, string email)
         {
-            var users = GetAllUsers();
+            var users = await GetAllUsersAsync();
             return users.Any(u => u.Username == username && u.Email == email);
         }
     }

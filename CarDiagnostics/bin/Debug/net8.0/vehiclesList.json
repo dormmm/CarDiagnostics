@@ -13,6 +13,11 @@
       { "model": "Civic" },
       { "model": "Accord" },
       { "model": "CR-V" }
+    ],
+    "dacia": [
+      { "model": "sandero" },
+      { "model": "bigstr" },
+      { "model": "daster" }
     ]
   }
   

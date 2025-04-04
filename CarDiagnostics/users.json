@@ -61,5 +61,12 @@
     "Password": "$2a$11$4yOtdVRvfultmh8yrtpy9enJX/BKXpe/Wd9ZFnNxG17kSbbSYwnPS",
     "Email": "dor@example.com",
     "Cars": null
+  },
+  {
+    "Id": 10,
+    "Username": "dormazor1",
+    "Password": "$2a$11$hljOqOyVc9jeKvcro7ShoePa.19mW3N.zzOGoVkNFYzxFCLPHDphq",
+    "Email": "dor1@example.com",
+    "Cars": null
   }
 ]
