@@ -7,10 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using CarDiagnostics.Domain.Interfaces;
+
 
 namespace CarDiagnostics.Repository
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly string _filePath;
         private readonly SemaphoreSlim _semaphore = new(1, 1);  // ✅ תחליף ל-ReaderWriterLockSlim

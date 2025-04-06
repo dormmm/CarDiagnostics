@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using CarDiagnostics.Models;
+using CarDiagnostics.Domain.Interfaces;
+
 
 namespace CarDiagnostics.Repository
 {
-    public class VehicleRepository
+    public class VehicleRepository : IVehicleRepository
     {
         private readonly string _filePath;
         private readonly ILogger<VehicleRepository> _logger;

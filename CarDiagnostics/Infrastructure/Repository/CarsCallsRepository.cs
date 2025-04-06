@@ -6,10 +6,12 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using CarDiagnostics.Domain.Interfaces;
+
 
 namespace CarDiagnostics.Repository
 {
-    public class CarsCallsRepository
+    public class CarsCallsRepository : ICarsCallsRepository
     {
         private readonly string _filePath;
         private readonly ILogger<CarsCallsRepository> _logger;

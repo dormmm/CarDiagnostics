@@ -5,17 +5,23 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CarDiagnostics.Domain.Interfaces;
+
 
 namespace CarDiagnostics.Services
 {
     public class CarService
     {
         private readonly AIService _aiService;
-        private readonly UserRepository _userRepository;
-        private readonly VehicleRepository _vehicleRepository;
-        private readonly CarsCallsRepository _carsCallsRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IVehicleRepository _vehicleRepository;
+        private readonly ICarsCallsRepository _carsCallsRepository;
 
-        public CarService(AIService aiService, UserRepository userRepository, VehicleRepository vehicleRepository, CarsCallsRepository carsCallsRepository)
+        public CarService(
+            AIService aiService,
+            IUserRepository userRepository,
+            IVehicleRepository vehicleRepository,
+            ICarsCallsRepository carsCallsRepository)
         {
             _aiService = aiService;
             _userRepository = userRepository;

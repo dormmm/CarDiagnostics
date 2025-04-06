@@ -1,5 +1,7 @@
 using CarDiagnostics.Services;
 using CarDiagnostics.Repository;
+using CarDiagnostics.Domain.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,10 @@ builder.Services.AddScoped<AIService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<VehicleRepository>();
 builder.Services.AddScoped<CarsCallsRepository>();
+builder.Services.AddScoped<ICarsCallsRepository, CarsCallsRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+
 
 var app = builder.Build();
 
