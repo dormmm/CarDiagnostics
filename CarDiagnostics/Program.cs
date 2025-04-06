@@ -1,6 +1,7 @@
 using CarDiagnostics.Services;
 using CarDiagnostics.Repository;
 using CarDiagnostics.Domain.Interfaces;
+using CarDiagnostics.API.Middlewares;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,8 @@ builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 
 
 var app = builder.Build();
+app.UseMiddleware<CarDiagnostics.API.Middlewares.ExceptionHandlingMiddleware>();
+
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
