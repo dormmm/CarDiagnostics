@@ -58,7 +58,7 @@
   {
     "Id": 9,
     "Username": "dormazor",
-    "Password": "$2a$11$4yOtdVRvfultmh8yrtpy9enJX/BKXpe/Wd9ZFnNxG17kSbbSYwnPS",
+    "Password": "$2a$11$hWkxMEjjfNPpTUbprtQ9/eW40BLJFNpxGPIicocbJFDP1P.VhHhX.",
     "Email": "dor@example.com",
     "Cars": null
   },
@@ -67,6 +67,13 @@
     "Username": "dormazor1",
     "Password": "$2a$11$hljOqOyVc9jeKvcro7ShoePa.19mW3N.zzOGoVkNFYzxFCLPHDphq",
     "Email": "dor1@example.com",
+    "Cars": null
+  },
+  {
+    "Id": 11,
+    "Username": "dormazor3",
+    "Password": "$2a$11$vQfnWLOzNKrk3ZvebdWPtOpWOsKzUSCEZ0zuM/njvsVbmy.PlPBmO",
+    "Email": "dor2@example.com",
     "Cars": null
   }
 ]

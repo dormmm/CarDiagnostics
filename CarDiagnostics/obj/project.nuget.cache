@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MNr8N2Sy6p0=",
+  "dgSpecHash": "yaWpRTiBQys=",
   "success": true,
-  "projectFilePath": "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
+  "projectFilePath": "C:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\97252\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\97252\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.10\\microsoft.aspnetcore.openapi.8.0.10.nupkg.sha512",
