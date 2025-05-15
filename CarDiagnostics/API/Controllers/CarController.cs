@@ -43,6 +43,18 @@ namespace CarDiagnostics.Controllers
             return Ok(companies);
         }
 
+        [HttpGet("plate/{plate}")]
+public IActionResult GetCarByPlate(string plate, [FromServices] LicensePlateService licenseService)
+{
+   var data = licenseService.GetCarByPlate(plate);
+
+    if (data == null)
+        return NotFound("רכב לא נמצא");
+
+    return Ok(data);
+}
+
+
         // ✅ הצגת כל הדגמים של חברה מסוימת
         [HttpGet("getCarModels/{company}")]
         public async Task<IActionResult> GetCarModels(string company)
