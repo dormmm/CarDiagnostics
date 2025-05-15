@@ -1,8 +1,8 @@
-CarDiagnostics/appsettings.json
+appsettings.json
 CarDiagnostics/bin/
 CarDiagnostics/obj/
 CarDiagnostics/bin/Debug/net8.0/appsettings.json
 # Ignore big JSON files
-CarDiagnostics/license_plate_data.json
+license_plate_data.json
 CarDiagnostics/bin/
 CarDiagnostics/obj/
