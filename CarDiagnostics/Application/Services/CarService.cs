@@ -79,32 +79,39 @@ namespace CarDiagnostics.Services
             return new OkObjectResult(new { Message = "Problem submitted successfully!", AI_Diagnosis = diagnosis });
         }
 
-        public async Task<string?> GetProblemSolutionAsync(string username, string email, string company, string model, int year, string problemDescription)
-        {
-            if (!await _userRepository.IsValidUserAsync(username, email))
-                return null;
+        public async Task<string?> GetProblemSolutionAsync(string username, string email, string company, string model, int year, string problemDescription, string? licensePlate = null)
+{
+    if (!await _userRepository.IsValidUserAsync(username, email))
+        return null;
 
-            if (!await _vehicleRepository.IsModelExistsNormalizedAsync(company, model))
-                return null;
+    var isModelExists = await _vehicleRepository.IsModelExistsNormalizedAsync(company, model);
 
-            var solution = await _aiService.GetDiagnosisAsync(company, model, year, problemDescription);
+    if (!isModelExists)
+    {
+        Console.WriteLine($"⚠️ דגם לא נמצא במערכת שלך: {company} / {model} – ממשיכים בכל זאת.");
+        // אתה יכול גם לרשום ל־log אם יש לך injected ILogger
+    }
 
-            var carCall = new Car
-            {
-                Username = username,
-                Email = email,
-                Company = company,
-                Model = model,
-                Year = year,
-                ProblemDescription = problemDescription,
-                AIResponse = solution
-            };
+    var solution = await _aiService.GetDiagnosisAsync(company, model, year, problemDescription);
 
-            var existingCalls = await _carsCallsRepository.ReadCallsAsync();
-            existingCalls.Add(carCall);
-            await _carsCallsRepository.SaveCallsAsync(existingCalls);
+    var carCall = new Car
+    {
+        Username = username,
+        Email = email,
+        Company = company,
+        Model = model,
+        Year = year,
+        ProblemDescription = problemDescription,
+        AIResponse = solution,
+        LicensePlate = licensePlate // ✅ שמירה בקובץ אם יש
+    };
 
-            return solution;
-        }
+    var existingCalls = await _carsCallsRepository.ReadCallsAsync();
+    existingCalls.Add(carCall);
+    await _carsCallsRepository.SaveCallsAsync(existingCalls);
+
+    return solution;
+}
+
     }
 }

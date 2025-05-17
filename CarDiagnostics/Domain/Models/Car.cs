@@ -25,5 +25,7 @@ namespace CarDiagnostics.Models
 
         // ❌ הסר את [Required]
         public string? AIResponse { get; set; }  // הפוך ל-nullable
+
+        public string? LicensePlate { get; set; } // ✅ מספר רכב – אופציונלי
     }
 }
