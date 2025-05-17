@@ -25,6 +25,8 @@ builder.Services.AddScoped<ICarsCallsRepository, CarsCallsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddSingleton<LicensePlateService>();
+builder.Services.AddSingleton<LicensePlateService>();
+
 
 
 var app = builder.Build();

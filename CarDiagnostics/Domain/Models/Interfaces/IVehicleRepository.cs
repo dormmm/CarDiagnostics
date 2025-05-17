@@ -9,6 +9,7 @@ namespace CarDiagnostics.Domain.Interfaces
         Task<VehicleList> GetAllVehiclesAsync();
         Task<bool> IsCompanyExistsAsync(string company);
         Task<bool> IsModelExistsAsync(string company, string model);
+        Task<bool> IsModelExistsNormalizedAsync(string company, string model); // ✅ חדש
         Task<List<string>> GetModelsByCompanyAsync(string company);
     }
 }

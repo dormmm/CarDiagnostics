@@ -2,6 +2,7 @@ using CarDiagnostics.Models;
 using CarDiagnostics.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using CarDiagnostics.Application.DTO;
 
 namespace CarDiagnostics.Controllers
 {
@@ -10,20 +11,19 @@ namespace CarDiagnostics.Controllers
     public class CarController : ControllerBase
     {
         private readonly CarService _carService;
+        private readonly LicensePlateService _licensePlateService;
 
-        public CarController(CarService carService)
+        public CarController(CarService carService, LicensePlateService licensePlateService)
         {
             _carService = carService;
+            _licensePlateService = licensePlateService;
         }
 
-        // ✅ שליחת בעיה חדשה למערכת עם בדיקת תקינות הקלט
         [HttpPost("submitProblem")]
         public async Task<IActionResult> SubmitProblem([FromBody] Car car)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             return await _carService.SubmitProblemAsync(
                 car.Username,
@@ -35,7 +35,33 @@ namespace CarDiagnostics.Controllers
             );
         }
 
-        // ✅ הצגת כל החברות הקיימות במערכת
+        [HttpPost("submitProblemByPlate")]
+        public async Task<IActionResult> SubmitProblemByPlate([FromBody] SubmitProblemByPlateDto dto)
+        {
+            var plateInfo = _licensePlateService.GetCarByPlate(dto.LicensePlate);
+            if (plateInfo == null)
+                return NotFound("רכב לא נמצא לפי מספר הרישוי.");
+
+            var manufacturer = plateInfo["manufacturer"]?.ToString();
+            var model = plateInfo["model"]?.ToString();
+            var year = int.TryParse(plateInfo["year"]?.ToString(), out int y) ? y : 0;
+
+            var solution = await _carService.GetProblemSolutionAsync(dto.Username, dto.Email, manufacturer, model, year, dto.ProblemDescription);
+            if (solution == null)
+                return NotFound("בעיה לא נמצאה או משתמש/רכב לא תקין.");
+
+            var response = new ProblemResponseWithCarDetails
+            {
+                Manufacturer = manufacturer,
+                Model = model,
+                Year = year,
+                ProblemDescription = dto.ProblemDescription,
+                Solution = solution
+            };
+
+            return Ok(response);
+        }
+
         [HttpGet("getCarCompanies")]
         public async Task<IActionResult> GetCarCompanies()
         {
@@ -43,29 +69,24 @@ namespace CarDiagnostics.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("plate/{plate}")]
-public IActionResult GetCarByPlate(string plate, [FromServices] LicensePlateService licenseService)
-{
-   var data = licenseService.GetCarByPlate(plate);
-
-    if (data == null)
-        return NotFound("רכב לא נמצא");
-
-    return Ok(data);
-}
-
-
-        // ✅ הצגת כל הדגמים של חברה מסוימת
         [HttpGet("getCarModels/{company}")]
         public async Task<IActionResult> GetCarModels(string company)
         {
             if (!await _carService.IsCompanyExistsAsync(company))
-            {
                 return NotFound(new { Message = "Company not found in the system." });
-            }
 
             var models = await _carService.GetCarModelsByCompanyAsync(company);
             return Ok(models);
+        }
+
+        [HttpGet("plate/{plate}")]
+        public IActionResult GetCarByPlate(string plate, [FromServices] LicensePlateService licenseService)
+        {
+            var data = licenseService.GetCarByPlate(plate);
+            if (data == null)
+                return NotFound("רכב לא נמצא");
+
+            return Ok(data);
         }
     }
 }

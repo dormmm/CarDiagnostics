@@ -4,6 +4,9 @@
       "model": "Corolla"
     },
     {
+      "model": "AXAL54L-ANXMBW"
+    },
+    {
       "model": "Camry"
     },
     {
@@ -19,7 +22,10 @@
       "model": "CHR"
     },
     {
-      "model": "RAV4"
+      "model": "TOYOTA C-HR"
+    },
+    {
+      "model": "RAV 4"
     },
     {
       "model": "Highlander"
@@ -1540,6 +1546,19 @@
     }
   ],
   "Wuling": [],
-  "XPeng": [],
+  "XPeng": [
+    {
+      "model": "P7"
+    },
+    {
+      "model": "G3"
+    },
+    {
+      "model": "G6"
+    },
+    {
+      "model": "G9"
+    }
+  ],
   "Zastava": []
 }

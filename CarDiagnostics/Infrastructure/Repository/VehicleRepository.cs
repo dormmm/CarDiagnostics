@@ -28,6 +28,31 @@ namespace CarDiagnostics.Repository
             _logger = logger;
         }
 
+        private string NormalizeModel(string? input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return input ?? "";
+
+    input = input.Trim();
+    var firstWord = input.Split(' ')[0].ToLower();
+
+    return char.ToUpper(firstWord[0]) + firstWord.Substring(1);
+}
+
+public async Task<bool> IsModelExistsNormalizedAsync(string company, string model)
+{
+    var data = await GetAllVehiclesAsync();
+
+    if (!data.ContainsKey(company))
+        return false;
+
+    var normalizedInput = NormalizeModel(model);
+
+    return data[company].Any(m => NormalizeModel(m.model) == normalizedInput);
+}
+
+
+
         public async Task<VehicleList> GetAllVehiclesAsync()
         {
             if (_cachedVehicles != null && DateTime.UtcNow - _lastLoadTime < _cacheDuration)
@@ -96,5 +121,7 @@ namespace CarDiagnostics.Repository
             var data = await GetAllVehiclesAsync();
             return data.Keys.ToList();
         }
+
+        
     }
 }

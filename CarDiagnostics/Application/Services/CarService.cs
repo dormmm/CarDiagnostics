@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CarDiagnostics.Domain.Interfaces;
 
-
 namespace CarDiagnostics.Services
 {
     public class CarService
@@ -47,6 +46,7 @@ namespace CarDiagnostics.Services
 
         public async Task<bool> IsModelExistsAsync(string company, string model)
         {
+            // עדיין משאיר את זה לשימושים פנימיים רגילים
             var companyModels = await _vehicleRepository.GetModelsByCompanyAsync(company);
             return companyModels.Contains(model);
         }
@@ -54,14 +54,10 @@ namespace CarDiagnostics.Services
         public async Task<IActionResult> SubmitProblemAsync(string username, string email, string company, string model, int year, string problemDescription)
         {
             if (!await _userRepository.IsValidUserAsync(username, email))
-            {
                 return new BadRequestObjectResult("User not found in the system.");
-            }
 
-            if (!await _vehicleRepository.IsModelExistsAsync(company, model))
-            {
+            if (!await _vehicleRepository.IsModelExistsNormalizedAsync(company, model))
                 return new BadRequestObjectResult("Company or model not found in the system.");
-            }
 
             var diagnosis = await _aiService.GetDiagnosisAsync(company, model, year, problemDescription);
 
@@ -81,6 +77,34 @@ namespace CarDiagnostics.Services
             await _carsCallsRepository.SaveCallsAsync(existingCalls);
 
             return new OkObjectResult(new { Message = "Problem submitted successfully!", AI_Diagnosis = diagnosis });
+        }
+
+        public async Task<string?> GetProblemSolutionAsync(string username, string email, string company, string model, int year, string problemDescription)
+        {
+            if (!await _userRepository.IsValidUserAsync(username, email))
+                return null;
+
+            if (!await _vehicleRepository.IsModelExistsNormalizedAsync(company, model))
+                return null;
+
+            var solution = await _aiService.GetDiagnosisAsync(company, model, year, problemDescription);
+
+            var carCall = new Car
+            {
+                Username = username,
+                Email = email,
+                Company = company,
+                Model = model,
+                Year = year,
+                ProblemDescription = problemDescription,
+                AIResponse = solution
+            };
+
+            var existingCalls = await _carsCallsRepository.ReadCallsAsync();
+            existingCalls.Add(carCall);
+            await _carsCallsRepository.SaveCallsAsync(existingCalls);
+
+            return solution;
         }
     }
 }
