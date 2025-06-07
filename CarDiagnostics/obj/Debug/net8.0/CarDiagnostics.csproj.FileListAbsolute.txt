@@ -42,3 +42,4 @@ c:\project dor\CarDiagnostics\bin\Debug\net8.0\carsCalls.json
 c:\project dor\CarDiagnostics\bin\Debug\net8.0\vehiclesList.json
 c:\project dor\CarDiagnostics\bin\Debug\net8.0\BCrypt.Net-Next.dll
 c:\project dor\CarDiagnostics\bin\Debug\net8.0\license_plate_data.json
+c:\project dor\CarDiagnostics\bin\Debug\net8.0\manual_links.json

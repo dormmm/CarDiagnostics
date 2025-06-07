@@ -46,26 +46,35 @@ namespace CarDiagnostics.Controllers
             var model = plateInfo["model"]?.ToString();
             var year = int.TryParse(plateInfo["year"]?.ToString(), out int y) ? y : 0;
 
-            var solution = await _carService.GetProblemSolutionAsync(dto.Username, dto.Email, manufacturer, model, year, dto.ProblemDescription,dto.LicensePlate );
+            var solution = await _carService.GetProblemSolutionAsync(
+                dto.Username,
+                dto.Email,
+                manufacturer,
+                model,
+                year,
+                dto.ProblemDescription,
+                dto.LicensePlate
+            );
+
             if (solution == null)
                 return NotFound("בעיה לא נמצאה או משתמש/רכב לא תקין.");
 
-           var fullCarData = new Dictionary<string, string>
-{
-    ["licensePlate"] = dto.LicensePlate // הוסף את מספר הרישוי בשורה הראשונה
-};
+            var fullCarData = new Dictionary<string, string>
+            {
+                ["licensePlate"] = dto.LicensePlate // הוסף את מספר הרישוי בשורה הראשונה
+            };
 
-// הוסף את שאר המידע מהרכב
-foreach (var kvp in plateInfo)
-{
-    fullCarData[kvp.Key] = kvp.Value?.ToString() ?? "";
-}
+            // הוסף את שאר המידע מהרכב
+            foreach (var kvp in plateInfo)
+            {
+                fullCarData[kvp.Key] = kvp.Value?.ToString() ?? "";
+            }
 
-// הוסף את התיאור והפתרון
-fullCarData["problemDescription"] = dto.ProblemDescription;
-fullCarData["solution"] = solution;
+            // הוסף את התיאור והפתרון
+            fullCarData["problemDescription"] = dto.ProblemDescription;
+            fullCarData["solution"] = solution;
 
-return Ok(fullCarData);
+            return Ok(fullCarData);
         }
 
         [HttpGet("getCarCompanies")]
@@ -88,6 +97,14 @@ return Ok(fullCarData);
         [HttpGet("plate/{plate}")]
         public IActionResult GetCarByPlate(string plate, [FromServices] LicensePlateService licenseService)
         {
+            // בדיקת תקינות: מספר רכב חייב להיות 7 או 8 ספרות בלבד
+            if (string.IsNullOrWhiteSpace(plate) ||
+                !(plate.Length == 7 || plate.Length == 8) ||
+                !plate.All(char.IsDigit))
+            {
+                return BadRequest("מספר רכב חייב להכיל 7 או 8 ספרות בלבד.");
+            }
+
             var data = licenseService.GetCarByPlate(plate);
             if (data == null)
                 return NotFound("רכב לא נמצא");

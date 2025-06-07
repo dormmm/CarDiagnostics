@@ -56,7 +56,7 @@ namespace CarDiagnostics.Services
                         }
                     },
                     temperature = 0.4,
-                    max_tokens = 400
+                    max_tokens = 800
                 };
 
                 var jsonRequest = JsonSerializer.Serialize(requestBody);

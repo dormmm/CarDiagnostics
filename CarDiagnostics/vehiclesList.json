@@ -238,6 +238,9 @@
       "model": "Q3"
     },
     {
+      "model": "Q2"
+    },
+    {
       "model": "Q5"
     },
     {
@@ -307,7 +310,7 @@
       "model": "7 Series"
     },
     {
-      "model": "8 Series"
+      "model": "88 Series"
     },
     {
       "model": "750E"
@@ -455,6 +458,9 @@
     },
     {
       "model": "Silverado"
+    },
+     {
+      "model": "Silverado 1500"
     },
     {
       "model": "Savana"
@@ -1024,15 +1030,18 @@
     {
       "model": "GLE"
     },
-    {
-      "model": "GLS"
-    },
-    {
-      "model": "G-Class"
-    },
-    {
-      "model": "EQB"
-    },
+{
+  "model": "GLS"
+},
+{
+  "model": "G-Class"
+},
+{
+  "model": "Mercedes GLC Class"
+},
+{
+  "model": "EQB"
+},
     {
       "model": "EQA"
     },
@@ -1254,6 +1263,9 @@
   "RAM": [
     {
       "model": "1500"
+    },
+    {
+      "model": "Ram Pickup 1500"
     },
     {
       "model": "2500"
@@ -1478,6 +1490,9 @@
   "Tesla": [
     {
       "model": "Model 3"
+    },
+     {
+      "model": "Tesla Model-Y"
     },
     {
       "model": "Model Y"
