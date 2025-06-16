@@ -111,5 +111,42 @@ namespace CarDiagnostics.Controllers
 
             return Ok(data);
         }
+
+        [HttpPost("advancedDiagnosis")]
+public async Task<IActionResult> AdvancedDiagnosis([FromBody] AdvancedDiagnosisRequestDto dto)
+{
+    string? company = dto.Company;
+    string? model = dto.Model;
+    int? year = dto.Year;
+
+    if (!string.IsNullOrEmpty(dto.LicensePlate))
+    {
+        var plateInfo = _licensePlateService.GetCarByPlate(dto.LicensePlate);
+        if (plateInfo == null)
+            return NotFound("רכב לא נמצא לפי מספר הרישוי.");
+
+        company = plateInfo["manufacturer"]?.ToString();
+        model = plateInfo["model"]?.ToString();
+        year = int.TryParse(plateInfo["year"]?.ToString(), out var parsedYear) ? parsedYear : null;
+    }
+
+    if (string.IsNullOrEmpty(company) || string.IsNullOrEmpty(model) || year == null)
+        return BadRequest("יש לספק או מספר רישוי תקין או פרטי רכב מלאים.");
+
+    var result = await _carService.RunAdvancedDiagnosisAsync(
+        dto.Username,
+        dto.Email,
+        company!,
+        model!,
+        year.Value,
+        dto.ProblemDescription,
+        dto.FollowUpAnswers ?? new Dictionary<string, string>(),
+        dto.Answers, // ✅ זה השדה החדש מסוג List<string>
+        dto.LicensePlate
+    );
+
+    return Ok(result);
+}
+
     }
 }

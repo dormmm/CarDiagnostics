@@ -34,6 +34,8 @@ builder.Services.AddSingleton<LicensePlateService>();
 builder.Services.AddSingleton<LicensePlateService>(); // שורה כפולה, מיותר - אפשר למחוק אחת
 
 builder.Services.AddSingleton(new ManualLinkService("manual_links.json"));
+builder.Services.AddSingleton<FollowUpQuestionStore>();
+
 
 
 builder.Services.AddSingleton<ProblemTopicService>(sp =>

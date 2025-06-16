@@ -23,9 +23,18 @@ namespace CarDiagnostics.Models
         [Required]
         public string ProblemDescription { get; set; }
 
-        // ❌ הסר את [Required]
-        public string? AIResponse { get; set; }  // הפוך ל-nullable
+        public string? AIResponse { get; set; }  // תשובת הבינה המלאכותית
 
-        public string? LicensePlate { get; set; } // ✅ מספר רכב – אופציונלי
+        public string? LicensePlate { get; set; }  // מספר רכב (אופציונלי)
+
+        public Dictionary<string, string>? FollowUp { get; set; }  // שאלות ותשובות
+
+        public List<string>? FollowUpQuestions { get; set; }  // רשימת השאלות שנשאלו
+
+        public string? Severity { get; set; }  // דרגת סיכון (Low / Medium / High)
+
+        public string? EstimatedCost { get; set; }  // הערכת עלות
+
+        public List<string>? Links { get; set; }  // קישורים למקורות מידע
     }
 }

@@ -5,6 +5,10 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using CarDiagnostics.Models;
+
+
 
 namespace CarDiagnostics.Services
 {
@@ -90,6 +94,182 @@ namespace CarDiagnostics.Services
             {
                 _logger.LogError(ex, "Error communicating with AI.");
                 return "שגיאה בעת שליחת הבקשה ל-AI.";
+            }
+        }
+
+      public async Task<AIResult> RunAdvancedDiagnosisAsync(
+    string company,
+    string model,
+    int year,
+    string problemDescription,
+    Dictionary<string, string> followUpAnswers)
+{
+    try
+    {
+        var client = _httpClientFactory.CreateClient();
+
+        var followUpText = string.Join("\n", followUpAnswers.Select(x => $"- {x.Key}: {x.Value}"));
+
+        var prompt = $@"
+המשתמש דיווח על תקלה ברכב {company} {model} {year}.
+תיאור התקלה: {problemDescription}
+תשובות המשתמש לשאלות המשך:
+{followUpText}
+
+אנא בצע את הדברים הבאים:
+
+1. ספק אבחנה טכנית מדויקת ככל האפשר – הסבר מה עלול לגרום לתקלה, ומה הסיכון אם היא לא תטופל.
+2. ציין **בצורה ברורה** אילו חלקים חשודים כתקולים (לדוגמה: מדחס מזגן, חיישן טמפרטורה, פיוז, ECU). גם אם יש מספר אפשרויות – ציין את כולן.
+3. ציין את **דרגת החומרה** של הבעיה: קל / בינוני / חמור / סכנה.
+4. **חובה** לכלול גם **עלות משוערת לתיקון**, עם מספר מדויק או טווח סכומים (למשל: 500 ש""ח, 800–1000 ש""ח).
+5. אל תכתוב תשובות כלליות או הצעות לפנות למוסך בלבד – צור אבחנה מקצועית אמיתית.
+
+בסיום, צור סיכום ברור ומסודר שמרכז את כל הנקודות האלו למשתמש.";
+
+        var requestBody = new
+        {
+            model = "gpt-3.5-turbo",
+            messages = new[]
+            {
+                new {
+                    role = "system",
+                    content = "אתה מומחה לרכב. עבודתך היא לאבחן תקלות בצורה מדויקת ומקצועית לפי תיאור הבעיה והתשובות לשאלות המשך. כל תשובה חייבת לכלול חלקים חשודים, חומרה ועלות."
+                },
+                new {
+                    role = "user",
+                    content = prompt
+                }
+            },
+            temperature = 0.4,
+            max_tokens = 800
+        };
+
+        var jsonRequest = JsonSerializer.Serialize(requestBody);
+        var requestContent = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+
+        var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", requestContent);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        _logger.LogInformation("AI Response (advanced): {Response}", responseString);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("AI API Error: {StatusCode}", response.StatusCode);
+            return new AIResult { AIResponse = $"שגיאה בתקשורת עם ה-AI: {response.StatusCode}" };
+        }
+
+        using var doc = JsonDocument.Parse(responseString);
+
+        if (doc.RootElement.TryGetProperty("choices", out JsonElement choices) && choices.GetArrayLength() > 0)
+        {
+            string answer = choices[0].GetProperty("message").GetProperty("content").GetString() ?? "לא התקבלה תשובה.";
+            answer = answer.Replace("\n", " ");
+
+            return new AIResult
+            {
+                AIResponse = answer,
+                Severity = ExtractSeverity(answer),
+                EstimatedCost = ExtractEstimatedCost(answer),
+                Links = ExtractLinks(answer)
+            };
+        }
+
+        return new AIResult { AIResponse = "לא התקבלה תשובה מה-AI." };
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error in RunAdvancedDiagnosisAsync.");
+        return new AIResult { AIResponse = "שגיאה בעת שליחת הבקשה ל-AI." };
+    }
+}
+
+
+        private string? ExtractSeverity(string text)
+        {
+            if (text.Contains("חמור", StringComparison.OrdinalIgnoreCase)) return "High";
+            if (text.Contains("בינוני", StringComparison.OrdinalIgnoreCase)) return "Medium";
+            if (text.Contains("קל", StringComparison.OrdinalIgnoreCase)) return "Low";
+            return null;
+        }
+
+        private string? ExtractEstimatedCost(string text)
+{
+    var match = Regex.Match(text, @"\d{2,5}\s*ש""?ח");
+    return match.Success ? match.Value : null;
+}
+
+        private List<string>? ExtractLinks(string text)
+        {
+            return text.Contains("https://")
+                ? Regex.Matches(text, @"https?://\S+")
+                      .Select(m => m.Value)
+                      .Distinct()
+                      .ToList()
+                : null;
+        }
+
+        public async Task<List<string>> GenerateFollowUpQuestionsAsync(string problemDescription)
+        {
+              try
+            {
+                var client = _httpClientFactory.CreateClient();
+
+               var prompt = $@"
+בהתבסס על הבעיה הבאה שתיאר משתמש ברכב: ""{problemDescription}""
+הצע שלוש שאלות המשך שיכולות לעזור לדייק את האבחנה. השב בפורמט של רשימת שאלות בלבד בלי הסברים.";
+
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = new[]
+                    {
+                        new {
+                            role = "system",
+                            content = "אתה יועץ טכני לרכב. עבודתך היא לשאול שאלות המשך ממוקדות שיעזרו לדייק את התקלה."
+                        },
+                        new {
+                            role = "user",
+                            content = prompt
+                        }
+                    },
+                    temperature = 0.3,
+                    max_tokens = 200
+                };
+
+                var jsonRequest = JsonSerializer.Serialize(requestBody);
+                var requestContent = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+
+                var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", requestContent);
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation("Follow-up question response: {Response}", responseString);
+
+                using var doc = JsonDocument.Parse(responseString);
+                if (doc.RootElement.TryGetProperty("choices", out JsonElement choices) && choices.GetArrayLength() > 0)
+                {
+                    string rawText = choices[0].GetProperty("message").GetProperty("content").GetString() ?? "";
+                    var lines = rawText.Split('\n')
+                        .Select(l => l.Trim())
+                        .Where(l => !string.IsNullOrWhiteSpace(l))
+                        .Select(l => l.TrimStart('-', '*', '1', '2', '3', '.', ')'))
+                        .ToList();
+
+                    return lines;
+                }
+
+                return new List<string> { "⚠️ לא התקבלו שאלות המשך מה-AI." };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating follow-up questions.");
+                return new List<string> { "⚠️ שגיאה בשליפת שאלות המשך." };
             }
         }
     }
