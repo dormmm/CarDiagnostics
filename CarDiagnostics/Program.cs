@@ -2,69 +2,67 @@ using CarDiagnostics.Services;
 using CarDiagnostics.Repository;
 using CarDiagnostics.Domain.Interfaces;
 using CarDiagnostics.API.Middlewares;
+using CarDiagnostics.API; // כדי שיכיר את SwaggerFileOperationFilter
 
-// יצירת builder לאפליקציה
+
 var builder = WebApplication.CreateBuilder(args);
 
-// הוספת שירותי MVC (Controllers) למערכת
+// Add services to the container
 builder.Services.AddControllers();
-
-// הוספת תמיכה ב-EndPoints ו-Swagger (תיעוד API)
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.OperationFilter<CarDiagnostics.API.SwaggerFileOperationFilter>();
+});
 
-// הוספת HttpClient לשימוש בשירותים חיצוניים (למשל, קריאות API)
-builder.Services.AddHttpClient(); // לאי-סיודיי
+builder.Services.AddHttpClient();
 
-// רישום שירותים (Services) ל-Injection
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<CarService>();
-builder.Services.AddScoped<AIService>();
-
-// רישום רפוזיטוריים (Repositories) ל-Injection
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<VehicleRepository>();
-builder.Services.AddScoped<CarsCallsRepository>();
+// Repositories
 builder.Services.AddScoped<ICarsCallsRepository, CarsCallsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<VehicleRepository>();
+builder.Services.AddScoped<CarsCallsRepository>();
 
-// רישום שירות Singleton (אובייקט יחיד לכל חיי האפליקציה)
+// Services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<CarService>();
+builder.Services.AddScoped<AIService>();
 builder.Services.AddSingleton<LicensePlateService>();
-builder.Services.AddSingleton<LicensePlateService>(); // שורה כפולה, מיותר - אפשר למחוק אחת
-
-builder.Services.AddSingleton(new ManualLinkService("manual_links.json"));
 builder.Services.AddSingleton<FollowUpQuestionStore>();
 
+// ManualLinkService עם פרמטר לקובץ
+builder.Services.AddSingleton(new ManualLinkService("manual_links.json"));
 
+// VisualDiagnosisService – תיקון והזרקה עם פרמטרים
+builder.Services.AddSingleton<VisualDiagnosisService>(sp =>
+{
+    var apiKey = builder.Configuration["OpenAI:ApiKey"];
+    var licensePlateService = sp.GetRequiredService<LicensePlateService>();
+    var manualLinkService = sp.GetRequiredService<ManualLinkService>();
 
+    return new VisualDiagnosisService(apiKey, licensePlateService, manualLinkService);
+});
+
+// ProblemTopicService – גם כן עם Key
 builder.Services.AddSingleton<ProblemTopicService>(sp =>
-    new ProblemTopicService(builder.Configuration["OpenAI:ApiKey"]));
+{
+    var openAiKey = builder.Configuration["OpenAI:ApiKey"];
+    return new ProblemTopicService(openAiKey);
+});
 
-
-
-// בניית האפליקציה
 var app = builder.Build();
 
-// הוספת Middleware לטיפול בחריגות (שגיאות)
-app.UseMiddleware<CarDiagnostics.API.Middlewares.ExceptionHandlingMiddleware>();
+// Middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// קונפיגורציה של ה-Pipeline
 if (app.Environment.IsDevelopment())
 {
-    // הפעלת Swagger רק בסביבת פיתוח
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// אפשרות לבטל הפניה ל-HTTPS (מושבת כרגע)
-// app.UseHttpsRedirection();
-
-// הוספת Middleware לאימות והרשאות
 app.UseAuthorization();
-
-// מיפוי ה-Controllers לנתיבים
 app.MapControllers();
-
-// הפעלת האפליקציה
 app.Run();

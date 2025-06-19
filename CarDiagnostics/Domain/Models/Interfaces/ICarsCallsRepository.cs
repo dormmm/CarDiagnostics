@@ -8,5 +8,7 @@ namespace CarDiagnostics.Domain.Interfaces
     {
         Task<List<Car>> ReadCallsAsync();
         Task SaveCallsAsync(List<Car> calls);
+
+        
     }
 }

@@ -71,5 +71,6 @@ namespace CarDiagnostics.Repository
                 _logger.LogError(ex, "Error saving carsCalls to {FilePath}", _filePath);
             }
         }
+        
     }
 }
