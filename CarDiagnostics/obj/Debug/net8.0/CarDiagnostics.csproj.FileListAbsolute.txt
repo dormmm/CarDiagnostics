@@ -43,3 +43,4 @@ c:\project dor\CarDiagnostics\obj\Debug\net8.0\refint\CarDiagnostics.dll
 c:\project dor\CarDiagnostics\obj\Debug\net8.0\CarDiagnostics.pdb
 c:\project dor\CarDiagnostics\obj\Debug\net8.0\CarDiagnostics.genruntimeconfig.cache
 c:\project dor\CarDiagnostics\obj\Debug\net8.0\ref\CarDiagnostics.dll
+c:\project dor\CarDiagnostics\bin\Debug\net8.0\HtmlAgilityPack.dll

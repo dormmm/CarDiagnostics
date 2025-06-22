@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "55Gdojk/Or4=",
+  "dgSpecHash": "BBjKZfsgT4s=",
   "success": true,
   "projectFilePath": "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\97252\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
+    "C:\\Users\\97252\\.nuget\\packages\\htmlagilitypack\\1.12.1\\htmlagilitypack.1.12.1.nupkg.sha512",
     "C:\\Users\\97252\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.10\\microsoft.aspnetcore.openapi.8.0.10.nupkg.sha512",
     "C:\\Users\\97252\\.nuget\\packages\\microsoft.bcl.memory\\9.0.0\\microsoft.bcl.memory.9.0.0.nupkg.sha512",
     "C:\\Users\\97252\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

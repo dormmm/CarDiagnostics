@@ -319,5 +319,53 @@ namespace CarDiagnostics.Services
     return result.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
 }
 
+public async Task<string> GetCompletionAsync(string prompt)
+{
+    try
+    {
+        var client = _httpClientFactory.CreateClient();
+
+        var requestBody = new
+        {
+            model = "gpt-3.5-turbo",
+            messages = new[]
+            {
+                new { role = "user", content = prompt }
+            },
+            temperature = 0.5,
+            max_tokens = 800
+        };
+
+        var jsonRequest = JsonSerializer.Serialize(requestBody);
+        var requestContent = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+
+        var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", requestContent);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        _logger.LogInformation("AI GetCompletion Response: {Response}", responseString);
+
+        if (!response.IsSuccessStatusCode)
+            return $"שגיאה בתקשורת עם GPT: {response.StatusCode}";
+
+        using var doc = JsonDocument.Parse(responseString);
+
+        if (doc.RootElement.TryGetProperty("choices", out JsonElement choices) && choices.GetArrayLength() > 0)
+        {
+            return choices[0].GetProperty("message").GetProperty("content").GetString() ?? "לא התקבלה תשובה.";
+        }
+
+        return "לא התקבלה תשובה מה-GPT.";
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "שגיאה בביצוע GetCompletionAsync");
+        return "שגיאה בבקשה ל-GPT.";
+    }
+}
+
+
     }
 }

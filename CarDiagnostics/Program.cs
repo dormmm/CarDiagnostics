@@ -32,6 +32,9 @@ builder.Services.AddScoped<AIService>();
 builder.Services.AddSingleton<LicensePlateService>();
 builder.Services.AddSingleton<FollowUpQuestionStore>();
 
+builder.Services.AddSingleton<ManualContentFetcher>();
+
+
 // ManualLinkService עם פרמטר לקובץ
 builder.Services.AddSingleton(new ManualLinkService("manual_links.json"));
 

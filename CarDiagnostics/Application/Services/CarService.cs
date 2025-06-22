@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using CarDiagnostics.Domain.Interfaces;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text;
+
+
 
 
 namespace CarDiagnostics.Services
@@ -20,6 +23,9 @@ namespace CarDiagnostics.Services
         private readonly ProblemTopicService _problemTopicService;
         private readonly ManualLinkService _manualLinkService;
         private readonly FollowUpQuestionStore _followUpStore;
+        private readonly ManualContentFetcher _manualContentFetcher;
+
+        
 
 
       public CarService(
@@ -29,7 +35,8 @@ namespace CarDiagnostics.Services
     ICarsCallsRepository carsCallsRepository,
     ProblemTopicService problemTopicService,
     ManualLinkService manualLinkService,
-    FollowUpQuestionStore followUpStore // ✅ הוספה
+    FollowUpQuestionStore followUpStore, // ✅ הוספה
+    ManualContentFetcher manualContentFetcher // ✅ הוספה
 )
 {
     _aiService = aiService;
@@ -39,6 +46,7 @@ namespace CarDiagnostics.Services
     _problemTopicService = problemTopicService;
     _manualLinkService = manualLinkService;
     _followUpStore = followUpStore; // ✅ שמירה
+     _manualContentFetcher = manualContentFetcher; // ✅ שמירה
 }
 
 
@@ -82,78 +90,113 @@ namespace CarDiagnostics.Services
         }
 
         public async Task<string?> GetProblemSolutionAsync(
-            string username,
-            string email,
-            string company,
-            string model,
-            int year,
-            string problemDescription,
-            string? licensePlate = null)
-        {
-            if (!await _userRepository.IsValidUserAsync(username, email))
-                return null;
+    string username,
+    string email,
+    string company,
+    string model,
+    int year,
+    string problemDescription,
+    string? licensePlate = null)
+{
+    if (!await _userRepository.IsValidUserAsync(username, email))
+        return null;
 
-            var isModelExists = await _vehicleRepository.IsModelExistsNormalizedAsync(company, model);
-            if (!isModelExists)
-            {
-                Console.WriteLine($"⚠️ דגם לא נמצא במערכת שלך: {company} / {model} – ממשיכים בכל זאת.");
-            }
+    var isModelExists = await _vehicleRepository.IsModelExistsNormalizedAsync(company, model);
+    if (!isModelExists)
+    {
+        Console.WriteLine($"⚠️ דגם לא נמצא במערכת שלך: {company} / {model} – ממשיכים בכל זאת.");
+    }
 
-            // שלב 1: קבלת פתרון GPT
-            var solution = await _aiService.GetDiagnosisAsync(company, model, year, problemDescription);
+    var topicData = await _problemTopicService.ExtractTopicAndKeywordsAsync(problemDescription);
+    Console.WriteLine($"🔍 נושא שזוהה: {topicData.topic}");
+    foreach (var word in topicData.keywords)
+        Console.WriteLine($"- {word}");
 
-            // שלב 2: ניתוח נושא ומילים נרדפות
-            var topicData = await _problemTopicService.ExtractTopicAndKeywordsAsync(problemDescription);
-            Console.WriteLine($"🔍 נושא שזוהה: {topicData.topic}");
-            Console.WriteLine("📚 מילים נרדפות שזוהו:");
-            foreach (var word in topicData.keywords)
-                Console.WriteLine($"- {word}");
+    // שלב 1: חיפוש קישורים
+    var (manualLinks, fallbackMessage) = _manualLinkService.FindLinks(
+        company, model, year, topicData.topic, topicData.keywords);
 
-            // שלב 3: חיפוש קישורים + הודעת fallback
-            var (manualLinks, fallbackMessage) = _manualLinkService.FindLinks(
-                company, model, year, topicData.topic, topicData.keywords);
+    var combinedContent = new StringBuilder();
 
-            // הוספת fallback אם קיים
-            if (!string.IsNullOrEmpty(fallbackMessage))
-            {
-                solution = $"⚠️ {fallbackMessage}\n\n" + solution;
-            }
+    foreach (var entry in manualLinks)
+{
+    Console.WriteLine($"🔗 מנסה לשלוף תוכן עבור: {entry.Key} - {entry.Value}");
+    var content = await _manualContentFetcher.FetchCleanContentAsync(entry.Value);
 
-            // הוספת קישורים לספר הרכב
-            if (manualLinks.Any())
-            {
-                Console.WriteLine("🔗 נמצאו קישורים מתוך ספר הרכב:");
-                foreach (var entry in manualLinks)
-                    Console.WriteLine($"- {entry.Key}: {entry.Value}");
+    if (string.IsNullOrWhiteSpace(content))
+        Console.WriteLine($"⚠️ תוכן ריק מתוך {entry.Key}");
+    else
+        Console.WriteLine($"📄 תוכן התקבל עבור {entry.Key}, אורך: {content.Length}");
 
-                solution += "\n\n📘 מידע נוסף מתוך ספר הרכב: ";
-                solution += string.Join(" | ", manualLinks.Select(entry =>
-                    $"{entry.Key}: {entry.Value?.Replace("\n", "").Replace("\r", "").Trim()}"));
-            }
-            else
-            {
-                Console.WriteLine("❌ לא נמצאו קישורים מתאימים מתוך ספר הרכב.");
-            }
+    combinedContent.AppendLine($"[From: {entry.Key}]\n{content}\n");
 
-            // שלב 4: שמירה לקריאה
-            var carCall = new Car
-            {
-                Username = username,
-                Email = email,
-                Company = company,
-                Model = model,
-                Year = year,
-                ProblemDescription = problemDescription,
-                AIResponse = solution,
-                LicensePlate = licensePlate
-            };
+   // Console.WriteLine($"📄 סיכום מתוך {entry.Key}:\n{content}\n------------------------");
 
-            var existingCalls = await _carsCallsRepository.ReadCallsAsync();
-            existingCalls.Add(carCall);
-            await _carsCallsRepository.SaveCallsAsync(existingCalls);
+}
 
-            return solution;
-        }
+
+    var finalPrompt = $"""
+רכב: {company} {model} {year}
+תיאור תקלה: {problemDescription}
+
+ראשית, השב על השאלה על סמך הידע הכללי שלך כמומחה לרכב.
+
+לאחר מכן, הצג מידע רלוונטי מתוך ספר הרכב – אם יש, והפרד אותו מהחלק הקודם.
+
+קיבלת מידע טכני מתוך ספר הרכב, והוא תואם לרכב ולבעיה שתיאר המשתמש.
+על סמך מידע זה ובשילוב הידע הכללי שלך, תן אבחנה מדויקת ככל האפשר.
+חשוב מאוד: השתמש בפרטים המספריים או בתוכן המשמעותי שהופיע בספר הרכב – כולל נתונים, הוראות, אזהרות וכל פרט רלוונטי.
+ציין במפורש אם המידע מתוך הספר עזר או לא.
+
+מידע טכני מתוך ספר הרכב:
+{combinedContent}
+
+בסיום, הצג אבחנה מבוססת, כולל:
+- סיווג חומרה (קל / בינוני / חמור)
+- הצעות לפתרון
+- עלות משוערת אם ניתן להעריך.
+""";
+
+
+
+    
+
+    var solution = await _aiService.GetCompletionAsync(finalPrompt);
+
+    // הוספת fallback אם קיים
+    if (!string.IsNullOrEmpty(fallbackMessage))
+    {
+        solution = $"⚠️ {fallbackMessage}\n\n" + solution;
+    }
+
+    // הוספת הקישורים לסוף התשובה
+    if (manualLinks.Any())
+    {
+        solution += "\n\n📘 קישורים מתוך ספר הרכב: ";
+        solution += string.Join(" | ", manualLinks.Select(entry =>
+            $"{entry.Key}: {entry.Value?.Replace("\n", "").Replace("\r", "").Trim()}"));
+    }
+
+    // שמירה
+    var carCall = new Car
+    {
+        Username = username,
+        Email = email,
+        Company = company,
+        Model = model,
+        Year = year,
+        ProblemDescription = problemDescription,
+        AIResponse = solution,
+        LicensePlate = licensePlate
+    };
+
+    var existingCalls = await _carsCallsRepository.ReadCallsAsync();
+    existingCalls.Add(carCall);
+    await _carsCallsRepository.SaveCallsAsync(existingCalls);
+
+    return solution;
+}
+
 
 
 
