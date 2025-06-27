@@ -147,7 +147,6 @@ public (Dictionary<string, string> Links, string? FallbackMessage) FindLinks(str
 
     try
     {
-        // מבנה שטוח
         if (topicsRaw is JsonObject flatLinks &&
             flatLinks.All(kv => kv.Value is JsonValue || kv.Value is JsonNode && ((JsonNode)kv.Value)?.GetValue<string>() != null))
         {
@@ -160,7 +159,7 @@ public (Dictionary<string, string> Links, string? FallbackMessage) FindLinks(str
         }
         else
         {
-            var topics = topicsRaw.AsObject(); // עלול לזרוק שגיאה אם יש כפילויות
+            var topics = topicsRaw.AsObject();
             foreach (var section in topics)
             {
                 if (section.Value is JsonObject links)
@@ -199,23 +198,44 @@ public (Dictionary<string, string> Links, string? FallbackMessage) FindLinks(str
     foreach (var kw in allKeywords)
         Console.WriteLine($"- {kw}");
 
-    foreach (var keyword in allKeywords)
+    // ניסיון ראשון – חיפוש לפי הופעה של שתי מילות מפתח לפחות
+    foreach (var (key, link) in allCandidates)
     {
-        foreach (var (key, link) in allCandidates)
+        var loweredKey = key.ToLowerInvariant();
+        int matchCount = allKeywords.Count(kw =>
+            loweredKey.Contains(kw) ||
+            kw.Contains(loweredKey) ||
+            loweredKey.TrimEnd('s') == kw.TrimEnd('s') ||
+            loweredKey.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
+                .Any(part => part == kw || part.TrimEnd('s') == kw.TrimEnd('s')));
+
+        if (matchCount >= 2 && link != null && !results.ContainsKey(key))
         {
-            var loweredKey = key.ToLowerInvariant();
-            Console.WriteLine($"🧪 בודק: keyword='{keyword}' מול key='{loweredKey}'");
+            results[key] = link;
+        }
+    }
 
-            bool isMatch =
-                loweredKey.Contains(keyword) ||
-                keyword.Contains(loweredKey) ||
-                loweredKey.TrimEnd('s') == keyword.TrimEnd('s') ||
-                loweredKey.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Any(part => part == keyword || part.TrimEnd('s') == keyword.TrimEnd('s'));
-
-            if (isMatch && link != null && !results.ContainsKey(key))
+    // אם לא נמצאו תוצאות, ננסה עם תנאי פחות מחמיר (כמו קודם)
+    if (!results.Any())
+    {
+        foreach (var keyword in allKeywords)
+        {
+            foreach (var (key, link) in allCandidates)
             {
-                results[key] = link;
+                var loweredKey = key.ToLowerInvariant();
+                Console.WriteLine($"🧪 בודק: keyword='{keyword}' מול key='{loweredKey}'");
+
+                bool isMatch =
+                    loweredKey.Contains(keyword) ||
+                    keyword.Contains(loweredKey) ||
+                    loweredKey.TrimEnd('s') == keyword.TrimEnd('s') ||
+                    loweredKey.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Any(part => part == keyword || part.TrimEnd('s') == keyword.TrimEnd('s'));
+
+                if (isMatch && link != null && !results.ContainsKey(key))
+                {
+                    results[key] = link;
+                }
             }
         }
     }
@@ -225,6 +245,7 @@ public (Dictionary<string, string> Links, string? FallbackMessage) FindLinks(str
 
     return (results, fallbackMessage);
 }
+
 
 
 

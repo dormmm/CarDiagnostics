@@ -296,15 +296,80 @@ public async Task<string> RunAdvancedDiagnosisAsync(
     var (manualLinks, fallbackMessage) = _manualLinkService.FindLinks(
         company, model, year, topicData.topic, topicData.keywords);
 
+    // 🆕 שליפת תוכן מהקישורים
+    var combinedContent = new StringBuilder();
+
+    foreach (var entry in manualLinks)
+    {
+        Console.WriteLine($"🔗 מנסה לשלוף תוכן עבור: {entry.Key} - {entry.Value}");
+        var content = await _manualContentFetcher.FetchCleanContentAsync(entry.Value);
+
+        if (string.IsNullOrWhiteSpace(content))
+            Console.WriteLine($"⚠️ תוכן ריק מתוך {entry.Key}");
+        else
+            Console.WriteLine($"📄 תוכן התקבל עבור {entry.Key}, אורך: {content.Length}");
+
+        combinedContent.AppendLine($"[From: {entry.Key}]\n{content}\n");
+    }
+
+    // 🧠 שילוב תוכן מתוך הקישורים בתשובת GPT
+var finalPrompt = $"""
+ענה כמומחה לרכב בשפה העברית בלבד.
+
+משימתך:
+לאבחן תקלה ברכב ולשלב בתשובתך מידע טכני מתוך ספר הרכב (באנגלית), אותו תקבל בהמשך. חובה להשתמש במידע זה, לתרגמו לעברית ולשלב אותו בצורה ברורה ואחראית בתוך האבחנה.
+
+הנחיות ברורות לשילוב מידע מספר הרכב:
+- שלב לפחות ציטוט אחד מתורגם לעברית.
+- אל תשתמש בתרגום מילולי, אלא הסבר ברור ונוח להבנה.
+- הוסף את שם הסעיף שממנו נלקח המידע, למשל:
+  בספר הרכב (Steering wheel) נכתב: "בעת שימוש בפונקציית ההגה המחומם, היא תתנתק אוטומטית לאחר 30 דקות."
+
+---
+
+פרטי הרכב:
+{company} {model} {year}
+
+תיאור התקלה:
+{problemDescription}
+
+תשובות המשך מהמשתמש:
+{string.Join("\n", followUpAnswers.Select(kv => $"{kv.Key}: {kv.Value}"))}
+
+מידע מתוך ספר הרכב (באנגלית):
+{combinedContent}
+
+---
+
+בתשובתך יש לכלול:
+- אבחנה טכנית מפורטת
+- שילוב של לפחות ציטוט אחד מתורגם מהמידע שניתן
+- דרוג חומרת התקלה (קל / בינוני / חמור)
+- הסבר מקצועי על מקור אפשרי לתקלה
+- הצעות לפתרון או המשך בדיקה
+- הערכת עלות משוערת לתיקון
+- ואם לא נמצא מידע רלוונטי – ציין זאת במפורש
+
+הקפד לענות בצורה עניינית, מקצועית וברורה.
+""";
+
+Console.WriteLine("🔎 Prompt שנשלח ל־GPT:");
+Console.WriteLine(finalPrompt);
+
+
+aiResult.AIResponse = await _aiService.GetCompletionAsync(finalPrompt);
+
+    // 🛑 הוספת fallback אם לא נמצאו קישורים
     if (!string.IsNullOrEmpty(fallbackMessage))
     {
         aiResult.AIResponse = $"⚠️ {fallbackMessage}\n\n" + aiResult.AIResponse;
     }
 
+    // 🧩 הצגת הקישורים עצמם
     if (manualLinks.Any())
     {
-        aiResult.AIResponse += "\n\n📘 מידע נוסף מתוך ספר הרכב: ";
-        aiResult.AIResponse += string.Join(" | ", manualLinks.Select(entry =>
+        aiResult.AIResponse += "\n\n📘 קישורים מתוך ספר הרכב:\n";
+        aiResult.AIResponse += string.Join("\n", manualLinks.Select(entry =>
             $"{entry.Key}: {entry.Value?.Replace("\n", "").Replace("\r", "").Trim()}"));
     }
 
@@ -352,7 +417,6 @@ public async Task<string> RunAdvancedDiagnosisAsync(
 
     return JsonSerializer.Serialize(result, jsonResultOptions);
 }
-
 
 
     }
