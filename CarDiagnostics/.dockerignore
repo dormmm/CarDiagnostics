@@ -1,0 +1,36 @@
+# קבצים ותיקיות שלא נחוצים בתמונה של Docker
+
+# תיקיות ביניים
+bin/
+obj/
+
+# הגדרות IDE
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# קבצי מערכת
+*.db
+*.log
+*.DS_Store
+*.swp
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# קבצי publish
+publish/
+
+# קבצי Git
+.git
+.gitignore
+
+# קבצי JSON זמניים/גדולים אם לא נדרש בפנים
+*.json
+!vehicles.json
+!carsCalls.json
+!vehiclesList.json
+
+# תיקיות אחרות שאתה יודע שאין צורך לבנות לתוך התמונה
