@@ -38,7 +38,8 @@ namespace CarDiagnostics.Controllers
         [HttpPost("submitProblemByPlate")]
         public async Task<IActionResult> SubmitProblemByPlate([FromBody] SubmitProblemByPlateDto dto)
         {
-            var plateInfo = _licensePlateService.GetCarByPlate(dto.LicensePlate);
+            var plateInfo = await _licensePlateService.GetCarByPlateAsync(dto.LicensePlate);
+
             if (plateInfo == null)
                 return NotFound("רכב לא נמצא לפי מספר הרישוי.");
 
@@ -95,7 +96,8 @@ namespace CarDiagnostics.Controllers
         }
 
         [HttpGet("plate/{plate}")]
-        public IActionResult GetCarByPlate(string plate, [FromServices] LicensePlateService licenseService)
+public async Task<IActionResult> GetCarByPlate(string plate, [FromServices] LicensePlateService licenseService)
+
         {
             // בדיקת תקינות: מספר רכב חייב להיות 7 או 8 ספרות בלבד
             if (string.IsNullOrWhiteSpace(plate) ||
@@ -105,7 +107,8 @@ namespace CarDiagnostics.Controllers
                 return BadRequest("מספר רכב חייב להכיל 7 או 8 ספרות בלבד.");
             }
 
-            var data = licenseService.GetCarByPlate(plate);
+            var data = await licenseService.GetCarByPlateAsync(plate);
+
             if (data == null)
                 return NotFound("רכב לא נמצא");
 
@@ -121,7 +124,8 @@ public async Task<IActionResult> AdvancedDiagnosis([FromBody] AdvancedDiagnosisR
 
     if (!string.IsNullOrEmpty(dto.LicensePlate))
     {
-        var plateInfo = _licensePlateService.GetCarByPlate(dto.LicensePlate);
+        var plateInfo = await _licensePlateService.GetCarByPlateAsync(dto.LicensePlate);
+
         if (plateInfo == null)
             return NotFound("רכב לא נמצא לפי מספר הרישוי.");
 

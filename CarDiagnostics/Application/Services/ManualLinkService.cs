@@ -1,53 +1,52 @@
+using CarDiagnostics.Repository; // אם AzureStorageService נמצא שם
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using CarDiagnostics.Services;
 
-namespace CarDiagnostics.Services
-{
-   public class ManualLinkService
+public class ManualLinkService
 {
     private readonly Dictionary<string, JsonObject> _manuals;
 
-   public ManualLinkService(string jsonFileName)
-{
-    var fullPath = Path.Combine(AppContext.BaseDirectory, jsonFileName);
-    Console.WriteLine($"📂 טוען קובץ מדריכים מ: {fullPath}");
-
-    if (!File.Exists(fullPath))
-        throw new FileNotFoundException("❌ קובץ המדריכים לא נמצא", fullPath);
-
-    _manuals = new();
-
-    try
+    public ManualLinkService(AzureStorageService storage, string fileName)
     {
-        var json = File.ReadAllText(fullPath);
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        Console.WriteLine($"☁️ טוען מדריכים מקובץ Azure בשם: {fileName}");
 
-        foreach (var make in root.EnumerateObject())
+        var json = storage.DownloadFileAsync(fileName).Result;
+
+        if (string.IsNullOrEmpty(json))
+            throw new FileNotFoundException("❌ קובץ המדריכים לא נמצא בענן", fileName);
+
+        _manuals = new();
+
+        try
         {
-            try
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            foreach (var make in root.EnumerateObject())
             {
-                var obj = JsonSerializer.Deserialize<JsonObject>(make.Value.GetRawText());
-                if (obj != null)
+                try
                 {
-                    _manuals[make.Name] = obj;
-                    Console.WriteLine($"✅ נטען יצרן: {make.Name}");
+                    var obj = JsonSerializer.Deserialize<JsonObject>(make.Value.GetRawText());
+                    if (obj != null)
+                    {
+                        _manuals[make.Name] = obj;
+                        Console.WriteLine($"✅ נטען יצרן: {make.Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ שגיאה בטעינת יצרן '{make.Name}': {ex.Message}");
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ שגיאה בטעינת יצרן '{make.Name}': {ex.Message}");
-            }
         }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ שגיאה כללית ב-JSON: {ex.Message}");
-    }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ שגיאה כללית ב-JSON: {ex.Message}");
+        }
 
-    Console.WriteLine($"📦 סה\"כ {_manuals.Count} יצרנים נטענו.");
-}
-
+        Console.WriteLine($"📦 סה\"כ {_manuals.Count} יצרנים נטענו.");
+    }
 
 
 public (Dictionary<string, string> Links, string? FallbackMessage) FindLinks(string make, string model, int year, string topic, List<string> keywords)
@@ -250,4 +249,4 @@ public (Dictionary<string, string> Links, string? FallbackMessage) FindLinks(str
 
 
     }
-}
+

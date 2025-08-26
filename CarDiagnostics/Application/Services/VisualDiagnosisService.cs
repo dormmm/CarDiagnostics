@@ -20,7 +20,8 @@ namespace CarDiagnostics.Services
 
         public async Task<object> AnalyzeAsync(string base64Image, string description, string licensePlate)
         {
-            var carInfo = _licensePlateService.GetCarByPlate(licensePlate);
+           var carInfo = await _licensePlateService.GetCarByPlateAsync(licensePlate);
+
             if (carInfo == null)
                 return new { error = "לא נמצאו פרטי רכב לפי מספר הרישוי" };
 

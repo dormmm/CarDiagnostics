@@ -2,75 +2,75 @@ using CarDiagnostics.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
 using CarDiagnostics.Domain.Interfaces;
+using CarDiagnostics.Services;
+using System;
 
 namespace CarDiagnostics.Repository
 {
     public class CarsCallsRepository : ICarsCallsRepository
     {
-        private readonly string _filePath;
+        private readonly AzureStorageService _storageService;
         private readonly ILogger<CarsCallsRepository> _logger;
+        private readonly string _fileName = "carsCalls.json";
 
-        // ✅ Cache
         private List<Car> _cachedCalls;
         private DateTime _cacheTimestamp;
         private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
 
-        public CarsCallsRepository(IConfiguration configuration, ILogger<CarsCallsRepository> logger)
+        public CarsCallsRepository(AzureStorageService storageService, ILogger<CarsCallsRepository> logger)
         {
-            _filePath = configuration["FilePaths:CarsCalls"] ?? throw new Exception("Missing config for FilePaths:CarsCalls");
+            _storageService = storageService;
             _logger = logger;
         }
 
         public async Task<List<Car>> ReadCallsAsync()
         {
+           
             try
             {
                 if (_cachedCalls != null && DateTime.Now - _cacheTimestamp < _cacheDuration)
-                {
                     return _cachedCalls;
-                }
 
-                if (!File.Exists(_filePath))
-                {
-                    _cachedCalls = new List<Car>();
-                    _cacheTimestamp = DateTime.Now;
-                    return _cachedCalls;
-                }
+                var json = await _storageService.DownloadFileAsync(_fileName);
 
-                var json = await File.ReadAllTextAsync(_filePath);
-                _cachedCalls = JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>();
+                _cachedCalls = string.IsNullOrEmpty(json)
+                    ? new List<Car>()
+                    : JsonConvert.DeserializeObject<List<Car>>(json) ?? new List<Car>();
+
                 _cacheTimestamp = DateTime.Now;
-
                 return _cachedCalls;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error reading carsCalls from {FilePath}", _filePath);
+                _logger.LogError(ex, "Error reading carsCalls from Azure Blob");
                 return new List<Car>();
             }
         }
 
         public async Task SaveCallsAsync(List<Car> calls)
         {
+            
+
             try
             {
                 var json = JsonConvert.SerializeObject(calls, Formatting.Indented);
-                await File.WriteAllTextAsync(_filePath, json);
+                 // ✅ שמירה ל-Azure
+                await _storageService.UploadFileAsync(_fileName, json);
 
-                // ✅ עדכון cache אחרי שמירה
+                // ✅ שמירה לקובץ מקומי (לצורך בדיקות או גיבוי)
+                var localPath = Path.Combine(Directory.GetCurrentDirectory(), "carsCalls.json");
+                await File.WriteAllTextAsync(localPath, json);
+
                 _cachedCalls = calls;
                 _cacheTimestamp = DateTime.Now;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving carsCalls to {FilePath}", _filePath);
+                _logger.LogError(ex, "Error saving carsCalls to Azure Blob");
             }
         }
-        
     }
 }

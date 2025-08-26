@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj": {}
+    "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj": {}
   },
   "projects": {
-    "C:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj": {
+    "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
+        "projectUniqueName": "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
         "projectName": "CarDiagnostics",
-        "projectPath": "C:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
+        "projectPath": "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
         "packagesPath": "C:\\Users\\97252\\.nuget\\packages\\",
-        "outputPath": "C:\\project dor\\CarDiagnostics\\obj\\",
+        "outputPath": "c:\\project dor\\CarDiagnostics\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -49,6 +49,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Azure.Storage.Blobs": {
+              "target": "Package",
+              "version": "[12.24.1, )"
+            },
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
@@ -93,7 +97,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.411/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.413/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

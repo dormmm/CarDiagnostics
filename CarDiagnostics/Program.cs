@@ -3,6 +3,8 @@ using CarDiagnostics.Repository;
 using CarDiagnostics.Domain.Interfaces;
 using CarDiagnostics.API.Middlewares;
 using CarDiagnostics.API; // כדי שיכיר את SwaggerFileOperationFilter
+using CarDiagnostics.Domain.Models.Interfaces;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,9 +36,22 @@ builder.Services.AddSingleton<FollowUpQuestionStore>();
 
 builder.Services.AddSingleton<ManualContentFetcher>();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<AzureStorageService>();
+builder.Services.AddSingleton<IAzureStorageService, AzureStorageService>();
+
+
+
 
 // ManualLinkService עם פרמטר לקובץ
-builder.Services.AddSingleton(new ManualLinkService("manual_links.json"));
+//builder.Services.AddSingleton(new ManualLinkService("manual_links.json"));
+
+builder.Services.AddSingleton<ManualLinkService>(sp =>
+{
+    var storage = sp.GetRequiredService<AzureStorageService>();
+    return new ManualLinkService(storage, "manual_links.json");
+});
+
 
 // VisualDiagnosisService – תיקון והזרקה עם פרמטרים
 builder.Services.AddSingleton<VisualDiagnosisService>(sp =>
