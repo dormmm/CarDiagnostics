@@ -7,37 +7,36 @@ using Microsoft.Extensions.Logging;
 using CarDiagnostics.Models;
 using CarDiagnostics.Domain.Interfaces;
 using System.Threading;
-using CarDiagnostics.Services;
+using CarDiagnostics.Domain.Models.Interfaces; // IAzureStorageService
 
 namespace CarDiagnostics.Repository
 {
     public class VehicleRepository : IVehicleRepository
     {
-        private readonly AzureStorageService _storageService;
+        private readonly IAzureStorageService _storageService;
         private readonly ILogger<VehicleRepository> _logger;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly string _fileName = "vehiclesList.json";
 
-
-        private VehicleList _cachedVehicles = null!;
+        private VehicleList? _cachedVehicles = null;
         private DateTime _lastLoadTime = DateTime.MinValue;
         private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(10);
 
-        public VehicleRepository(AzureStorageService storageService, ILogger<VehicleRepository> logger)
+        public VehicleRepository(IAzureStorageService storageService, ILogger<VehicleRepository> logger)
         {
             _storageService = storageService;
             _logger = logger;
         }
 
-        private string NormalizeModel(string? input)
+        private static string NormalizeModel(string? input)
         {
             if (string.IsNullOrWhiteSpace(input))
-                return input ?? "";
+                return input ?? string.Empty;
 
             input = input.Trim();
-            var firstWord = input.Split(' ')[0].ToLower();
+            var firstWord = input.Split(' ')[0].ToLowerInvariant();
 
-            return char.ToUpper(firstWord[0]) + firstWord.Substring(1);
+            return char.ToUpperInvariant(firstWord[0]) + firstWord.Substring(1);
         }
 
         public async Task<VehicleList> GetAllVehiclesAsync()
@@ -49,9 +48,9 @@ namespace CarDiagnostics.Repository
             try
             {
                 var json = await _storageService.DownloadFileAsync(_fileName);
-                _cachedVehicles = string.IsNullOrEmpty(json)
+                _cachedVehicles = string.IsNullOrWhiteSpace(json)
                     ? new VehicleList()
-                    : JsonConvert.DeserializeObject<VehicleList>(json) ?? new VehicleList();
+                    : JsonConvert.DeserializeObject<VehicleList>(json!) ?? new VehicleList();
 
                 _lastLoadTime = DateTime.UtcNow;
                 return _cachedVehicles;

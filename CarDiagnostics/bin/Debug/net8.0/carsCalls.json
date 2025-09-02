@@ -2875,5 +2875,20 @@
     "Severity": null,
     "EstimatedCost": null,
     "Links": null
+  },
+  {
+    "Username": "john_doe",
+    "Email": "john.doe@example.com",
+    "Company": "Hyundai",
+    "Model": "Kona",
+    "Year": 2023,
+    "ProblemDescription": "בכלל המזגן לא עובדת חזק",
+    "AIResponse": "⚠️ ⚠️ לא נמצא מידע מדויק לשנת 2023, אך מצאנו מידע משנת 2020 שהיא השנה הקרובה ביותר.\n\nבהתחשב במידע המופיע בספר הרכב, ניתן להסיק כי הבעיה במערכת המזגן עשויה להיות קשורה לכמות הגז המקרר במערכת. יתכן שיש חוסר בכמות הגז או שישנה בעיה בדחיפת הגז במערכת. נראה כי המערכת עובדת חלקית, אך לא ביכולת מלואה.\n\nהפתרון המומלץ הוא לבדוק את רמת הגז במערכת המזגן ולוודא שהיא ברמה תקינה. במידה ויש חוסר בגז, יש להוסיף כמות גז מתאימה למערכת. במידה והבעיה נמשכת, יש לפנות למוסך מורשה לביצוע בדיקה מדויקת ותיקון מקצועי.\n\nעלות התיקון עשויה להשתנות בהתאם לסוג הבעיה ולכמות העבודה הדרושה. יש להתייעץ עם מוסך מורשה כדי לקבל הערכת עלות מדויקת לתיקון הבעיה במערכת המזגן של הרכב.\n\n📘 קישורים מתוך ספר הרכב: Air Conditioning System: https://www.mycarusermanual.com/hyundai/kona/suv/2020/specifications-consumer-information-and-reporting-safety-defects--air-conditioning-system | Accessing Your Vehicle: https://www.mycarusermanual.com/hyundai/kona/suv/2020/convenient-features-of-your-vehicle--accessing-your-vehicle | Recommended Lubricants and Capacities: https://www.mycarusermanual.com/hyundai/kona/suv/2020/specifications-consumer-information-and-reporting-safety-defects--recommended-lubricants-and-capacities | Manual Climate Control System: https://www.mycarusermanual.com/hyundai/kona/suv/2020/convenient-features-of-your-vehicle--manual-climate-control-system | Automatic Climate Control System: https://www.mycarusermanual.com/hyundai/kona/suv/2020/convenient-features-of-your-vehicle--automatic-climate-control-system | Climate Control Additional Features: https://www.mycarusermanual.com/hyundai/kona/suv/2020/convenient-features-of-your-vehicle--climate-control-additional-features",
+    "LicensePlate": null,
+    "FollowUp": null,
+    "FollowUpQuestions": null,
+    "Severity": null,
+    "EstimatedCost": null,
+    "Links": null
   }
 ]
