@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "99rwWzOqZ5A=",
+  "dgSpecHash": "17Msiwhb+QA=",
   "success": true,
-  "projectFilePath": "c:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
+  "projectFilePath": "C:\\project dor\\CarDiagnostics\\CarDiagnostics.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\97252\\.nuget\\packages\\azure.core\\1.44.1\\azure.core.1.44.1.nupkg.sha512",
     "C:\\Users\\97252\\.nuget\\packages\\azure.storage.blobs\\12.24.1\\azure.storage.blobs.12.24.1.nupkg.sha512",

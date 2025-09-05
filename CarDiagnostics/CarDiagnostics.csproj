@@ -6,6 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- מחריג את תיקיית הטסטים כברירת מחדל מכל הגלובינג של ה-SDK -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);CarDiagnostics.Tests\**</DefaultItemExcludes>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.1" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -20,6 +25,13 @@
     <None Update="manual_links.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <!-- מוודא שלא ייכנסו קבצים מהטסטים לקומפילציה של הפרויקט הראשי -->
+  <ItemGroup>
+    <Compile Remove="CarDiagnostics.Tests\**\*.cs" />
+    <None Remove="CarDiagnostics.Tests\**\*" />
+    <EmbeddedResource Remove="CarDiagnostics.Tests\**\*" />
   </ItemGroup>
 
 </Project>
