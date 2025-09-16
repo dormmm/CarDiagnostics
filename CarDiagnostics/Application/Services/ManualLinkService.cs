@@ -1,3 +1,4 @@
+using System.Diagnostics;                 // NEW
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using CarDiagnostics.Domain.Models.Interfaces; // IAzureStorageService
+using CarDiagnostics.Services;
 
 namespace CarDiagnostics.Services
 {
@@ -13,14 +15,21 @@ namespace CarDiagnostics.Services
         private readonly IAzureStorageService _storage;
         private readonly string _fileName;
 
+        // === NEW ===
+        private readonly ILinkFetcherService _linkFetcher;
+
         private readonly Dictionary<string, JsonObject> _manuals = new();
         private bool _loaded = false;
         private readonly SemaphoreSlim _loadLock = new(1, 1);
 
-        public ManualLinkService(IAzureStorageService storage, string fileName)
+        // היה:
+        // public ManualLinkService(IAzureStorageService storage, string fileName)
+        // NEW: מוסיפים ILinkFetcherService
+        public ManualLinkService(IAzureStorageService storage, string fileName, ILinkFetcherService linkFetcher)
         {
             _storage = storage;
             _fileName = fileName;
+            _linkFetcher = linkFetcher;   // NEW
         }
 
         // טעינה עצלה של הקובץ מה-Blob (נקראת אוטומטית ב-FindLinks)
@@ -265,10 +274,36 @@ namespace CarDiagnostics.Services
                 }
             }
 
-            if (!results.Any())
+                       if (!results.Any())
                 Console.WriteLine("❌ לא נמצא אף קישור.");
+
+            // ===== Parallel enrichment (Concurrency) =====
+            try
+            {
+                var urls = results.Values
+                    .Where(u => !string.IsNullOrWhiteSpace(u))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (urls.Count > 0)
+                {
+                    var sw = Stopwatch.StartNew();
+                    _ = _linkFetcher
+                        .FetchTitlesAsync(urls, maxParallel: 5, ct: CancellationToken.None)
+                        .GetAwaiter().GetResult();
+                    sw.Stop();
+
+                    Console.WriteLine($"[FindLinks] Parallel enrichment took {sw.ElapsedMilliseconds} ms for {urls.Count} links.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FindLinks] Parallel enrichment failed: {ex.Message}");
+            }
+            // ===== end =====
 
             return (results, fallbackMessage);
         }
     }
 }
+
