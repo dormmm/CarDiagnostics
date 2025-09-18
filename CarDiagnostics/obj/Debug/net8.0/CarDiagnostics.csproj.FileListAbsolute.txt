@@ -61,3 +61,5 @@ C:\project dor\CarDiagnostics\obj\Debug\net8.0\refint\CarDiagnostics.dll
 C:\project dor\CarDiagnostics\obj\Debug\net8.0\CarDiagnostics.pdb
 C:\project dor\CarDiagnostics\obj\Debug\net8.0\CarDiagnostics.genruntimeconfig.cache
 C:\project dor\CarDiagnostics\obj\Debug\net8.0\ref\CarDiagnostics.dll
+c:\project dor\CarDiagnostics\bin\Debug\net8.0\Pipelines.Sockets.Unofficial.dll
+c:\project dor\CarDiagnostics\bin\Debug\net8.0\StackExchange.Redis.dll

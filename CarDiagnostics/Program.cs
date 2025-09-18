@@ -5,6 +5,11 @@ using CarDiagnostics.API.Middlewares;
 using CarDiagnostics.API; // SwaggerFileOperationFilter
 using CarDiagnostics.Domain.Models.Interfaces;
 
+// === Redis (usings) ===
+using StackExchange.Redis;
+using CarDiagnostics.Infrastructure.Caching;
+// =======================
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Core
@@ -60,6 +65,26 @@ builder.Services.AddSingleton<ProblemTopicService>(sp =>
     var openAiKey = builder.Configuration["OpenAI:ApiKey"];
     return new ProblemTopicService(openAiKey);
 });
+
+
+// ======== Redis (אופציונלי, לפני builder.Build) ========
+var redisConn = builder.Configuration.GetConnectionString("Redis");
+
+if (!string.IsNullOrWhiteSpace(redisConn))
+{
+    // יש חיבור ל-Redis (לוקאלי/ענן) – נרשום את הלקוח והשירות
+    builder.Services.AddSingleton<IConnectionMultiplexer>(
+        _ => ConnectionMultiplexer.Connect(redisConn));
+
+    builder.Services.AddSingleton<RedisCacheService>();
+    Console.WriteLine("✅ Redis enabled (ConnectionStrings:Redis found).");
+}
+else
+{
+    // אין Redis מוגדר – ממשיכים לרוץ בלי Redis
+    Console.WriteLine("⚠️ Redis disabled (ConnectionStrings:Redis not found). Running without Redis cache.");
+}
+// ========================================================
 
 var app = builder.Build();
 
