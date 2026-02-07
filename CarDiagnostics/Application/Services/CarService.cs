@@ -348,6 +348,13 @@ var finalPrompt = $"""
 - הסבר מקצועי על מקור אפשרי לתקלה
 - הצעות לפתרון או המשך בדיקה
 - הערכת עלות משוערת לתיקון
+חובה מחייבת לגבי מחיר:
+- בסוף התשובה כתוב שורה נפרדת בדיוק בפורמט הזה:
+  עלות משוערת (ש״ח): <מספר>
+- המספר חייב להיות מספר בלבד (למשל 0 או 250 או 1200).בלי טקסט.
+- אסור לכתוב "תלויה", "משתנה" או "לא ניתן לדעת" בלי מספר.
+- אם העלות יכולה להיות אפס (למשל בדיקה עצמית / מילוי מים לווישרים / החלפת פיוז פשוט) כתוב:
+  עלות משוערת (ש״ח): 0
 - ואם לא נמצא מידע רלוונטי – ציין זאת במפורש
 
 הקפד לענות בצורה עניינית, מקצועית וברורה.
@@ -358,6 +365,10 @@ Console.WriteLine(finalPrompt);
 
 
 aiResult.AIResponse = await _aiService.GetCompletionAsync(finalPrompt);
+
+aiResult.Severity = _aiService.ExtractSeverityPublic(aiResult.AIResponse);
+aiResult.EstimatedCost = _aiService.ExtractEstimatedCostPublic(aiResult.AIResponse);
+
 
     // 🛑 הוספת fallback אם לא נמצאו קישורים
     if (!string.IsNullOrEmpty(fallbackMessage))

@@ -14,6 +14,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Core
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevCors", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -87,6 +99,10 @@ else
 // ========================================================
 
 var app = builder.Build();
+
+
+app.UseCors("DevCors");
+
 
 // Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();

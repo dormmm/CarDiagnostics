@@ -37,30 +37,73 @@ namespace CarDiagnostics.Services
 
                 var requestBody = new
                 {
-                    model = "gpt-3.5-turbo",
-                    messages = new[]
-                    {
-                        new {
-                            role = "system",
-                            content = @"
-                                אתה מומחה למכוניות. תן אבחנה מקצועית לבעיות רכב לפי סוג הרכב, הדגם והשנה.
-                                ציין את סיווג החומרה של הבעיה על פי הקטגוריות הבאות:
-                                - קל: ניתן לתקן בטיפול הבא.
-                                - בינוני: לא מסכן, אבל כדאי לתקן בהקדם.
-                                - חמור: צריך לנסוע למוסך מיידית.
-                                - סכנה: אין לנסוע כלל, חובה להזמין גרר.
-                                בנוסף, תן הערכת מחיר ממוצעת לתיקון בהתחשב בסוג הרכב.
-                            "
-                        },
-                        new {
-                            role = "user",
-                            content = $@"
-                                הרכב הוא {company} {model} משנת {year}. 
-                                הבעיה היא: {problemDescription}.
-                                תן אבחנה טכנית, סיווג חומרה והערכת מחיר.
-                            "
-                        }
-                    },
+                    model = "gpt-4o-mini",
+                   messages = new[]
+{
+    new {
+        role = "system",
+        content = @"
+You are an automotive expert specializing in car diagnostics in Israel.
+
+Your task is to provide a professional diagnosis based on:
+- car manufacturer
+- car model
+- production year
+- problem description
+
+You must strictly follow these rules.
+
+1) Severity classification rules (mandatory):
+
+Use exactly one of the following values:
+- Low
+- Medium
+- High
+- Danger
+
+Definitions:
+- Low: A minor issue that does not affect safety or the engine and can be fixed later or by the user.
+  Examples: windshield washer fluid missing, blown interior bulb, simple fuse, system settings, minor non-constant noise.
+- Medium: Not immediately dangerous, but should be fixed soon to avoid worsening or inconvenience.
+  Examples: door not closing properly, air conditioner not cooling, comfort or assist system sensor issues.
+- High: Real risk of damage to the engine or a critical system, or reduced driving safety.
+  Examples: engine overheating, strong power loss with engine warning light, serious vibrations, brake or steering issues.
+- Danger: Immediate danger. Do not drive. Tow truck required.
+  Examples: brake failure, steering failure, extreme engine overheating, fuel leak, heavy smoke or burning smell.
+
+Important:
+- Never classify an issue as High or Danger unless there is a clear and real safety or engine risk.
+- Simple maintenance issues must always be classified as Low.
+- Do not confuse different systems (for example: windshield washer fluid is NOT engine cooling).
+- If unsure, choose a lower severity level and recommend inspection.
+
+2) Cost estimation rules:
+- Always provide an estimated repair cost in Israeli Shekels (NIS).
+- If the action is simple and can be done by the user, the cost may be 0.
+- If unsure, provide a conservative and realistic estimate.
+- Do not invent extreme or unrealistic prices.
+
+3) Output format rules (mandatory):
+
+At the end of your response, add exactly these two lines, with no extra text:
+
+Severity: <Low|Medium|High|Danger>
+EstimatedCostNIS: <number>
+
+The EstimatedCostNIS line must contain digits only (for example: 0, 250, 1200).
+Do not add currency symbols or text on that line.
+"
+    },
+    new {
+        role = "user",
+        content = $@"
+The car is {company} {model}, year {year}.
+The reported problem is: {problemDescription}.
+Provide a technical diagnosis, severity classification, and estimated repair cost.
+"
+    }
+},
+
                     temperature = 0.4,
                     max_tokens = 800
                 };
@@ -225,6 +268,18 @@ namespace CarDiagnostics.Services
             var match = Regex.Match(text, @"\d{2,5}\s*ש""?ח");
             return match.Success ? match.Value : null;
         }
+
+        // 🔓 wrappers ציבוריים לשימוש מחוץ ל-AIService
+public string? ExtractSeverityPublic(string text)
+{
+    return ExtractSeverity(text);
+}
+
+public string? ExtractEstimatedCostPublic(string text)
+{
+    return ExtractEstimatedCost(text);
+}
+
 
         private List<string>? ExtractLinks(string text)
         {
